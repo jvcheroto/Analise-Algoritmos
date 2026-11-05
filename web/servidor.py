@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 import zipfile
 
 from tsp import gerar_matriz
+from catalogo_graficos import GRAFICOS
 from web.experimentos import Gerenciador, csv_resultados, para_api
 
 ESTATICOS = Path(__file__).resolve().parent / 'static'
@@ -58,6 +59,17 @@ class Handler(BaseHTTPRequestHandler):
             if caminho in estaticos:
                 nome, tipo = estaticos[caminho]
                 self._enviar((ESTATICOS / nome).read_bytes(), tipo)
+            elif caminho == '/api/graficos':
+                pasta = ESTATICOS.parents[1] / 'resultados' / 'graficos'
+                self._json([dict(arquivo=nome, titulo=titulo, descricao=descricao,
+                                 disponivel=(pasta / nome).is_file(), url='/graficos/' + nome)
+                            for nome, titulo, descricao in GRAFICOS])
+            elif len(partes) == 2 and partes[0] == 'graficos' and partes[1] in {d[0] for d in GRAFICOS}:
+                arquivo = ESTATICOS.parents[1] / 'resultados' / 'graficos' / partes[1]
+                if arquivo.is_file():
+                    self._enviar(arquivo.read_bytes(), 'image/png')
+                else:
+                    self._json({'erro': 'Gráfico ainda não gerado'}, 404)
             elif caminho == '/api/experimentos':
                 self._json(self.server.gerenciador.lista())
             elif len(partes) in (3, 4) and partes[:2] == ['api', 'experimentos']:

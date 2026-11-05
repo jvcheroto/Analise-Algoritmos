@@ -1,0 +1,344 @@
+{
+  "id": "8ecf318d5d64418fb26b00bdb9835e44",
+  "titulo": "Comparação de métodos",
+  "estado": "concluido",
+  "inicio": "2026-11-05T20:16:44.963793+00:00",
+  "fim": "2026-11-05T20:16:46.497786+00:00",
+  "config": {
+    "tipo": "comparacao",
+    "inicio": 10,
+    "fim": 10,
+    "repeticoes": 3,
+    "semente": 42,
+    "limite": 90,
+    "comparar_origem": false,
+    "gerador": "biblioteca"
+  },
+  "ambiente": {
+    "python": "3.12.14",
+    "sistema": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cronometro": "perf_counter somente no cálculo, incluindo validações e contadores; sem aquecimento"
+  },
+  "amostras": [
+    {
+      "n": 10,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticao": 1,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "rotas": 362880,
+      "arestas": 3628800,
+      "exato": true,
+      "segundos": 0.3659027610001431
+    },
+    {
+      "n": 10,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticao": 2,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "rotas": 362880,
+      "arestas": 3628800,
+      "exato": true,
+      "segundos": 0.3544964210004764
+    },
+    {
+      "n": 10,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticao": 3,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "rotas": 362880,
+      "arestas": 3628800,
+      "exato": true,
+      "segundos": 0.3385648960002072
+    },
+    {
+      "n": 10,
+      "algoritmo": "held_karp",
+      "fixar": true,
+      "repeticao": 1,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "rotas": null,
+      "arestas": null,
+      "exato": true,
+      "segundos": 0.0030633349997515325
+    },
+    {
+      "n": 10,
+      "algoritmo": "held_karp",
+      "fixar": true,
+      "repeticao": 2,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "rotas": null,
+      "arestas": null,
+      "exato": true,
+      "segundos": 0.0031978739998521633
+    },
+    {
+      "n": 10,
+      "algoritmo": "held_karp",
+      "fixar": true,
+      "repeticao": 3,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "rotas": null,
+      "arestas": null,
+      "exato": true,
+      "segundos": 0.00311482100005378
+    },
+    {
+      "n": 10,
+      "algoritmo": "guloso",
+      "fixar": true,
+      "repeticao": 1,
+      "custo": 224,
+      "rota": [
+        0,
+        3,
+        2,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        4,
+        0
+      ],
+      "rotas": null,
+      "arestas": null,
+      "exato": false,
+      "segundos": 2.807100008794805e-05
+    },
+    {
+      "n": 10,
+      "algoritmo": "guloso",
+      "fixar": true,
+      "repeticao": 2,
+      "custo": 224,
+      "rota": [
+        0,
+        3,
+        2,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        4,
+        0
+      ],
+      "rotas": null,
+      "arestas": null,
+      "exato": false,
+      "segundos": 2.7189999855181668e-05
+    },
+    {
+      "n": 10,
+      "algoritmo": "guloso",
+      "fixar": true,
+      "repeticao": 3,
+      "custo": 224,
+      "rota": [
+        0,
+        3,
+        2,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        4,
+        0
+      ],
+      "rotas": null,
+      "arestas": null,
+      "exato": false,
+      "segundos": 2.861199936887715e-05
+    }
+  ],
+  "plano_total": 9,
+  "atual": {
+    "n": 10,
+    "algoritmo": "guloso",
+    "fixar": true,
+    "repeticao": 3
+  },
+  "mensagem": "Todas as chamadas planejadas foram concluídas.",
+  "resumo": [
+    {
+      "n": 10,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticoes": 3,
+      "mediana": 0.3544964210004764,
+      "minimo": 0.3385648960002072,
+      "maximo": 0.3659027610001431,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "exato": true,
+      "rotas": 362880,
+      "arestas": 3628800
+    },
+    {
+      "n": 10,
+      "algoritmo": "held_karp",
+      "fixar": true,
+      "repeticoes": 3,
+      "mediana": 0.00311482100005378,
+      "minimo": 0.0030633349997515325,
+      "maximo": 0.0031978739998521633,
+      "custo": 144,
+      "rota": [
+        0,
+        3,
+        2,
+        4,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        0
+      ],
+      "exato": true,
+      "rotas": null,
+      "arestas": null
+    },
+    {
+      "n": 10,
+      "algoritmo": "guloso",
+      "fixar": true,
+      "repeticoes": 3,
+      "mediana": 2.807100008794805e-05,
+      "minimo": 2.7189999855181668e-05,
+      "maximo": 2.861199936887715e-05,
+      "custo": 224,
+      "rota": [
+        0,
+        3,
+        2,
+        9,
+        1,
+        6,
+        5,
+        8,
+        7,
+        4,
+        0
+      ],
+      "exato": false,
+      "rotas": null,
+      "arestas": null
+    }
+  ],
+  "constante": 9.768971037270624e-08,
+  "calibracao_n": 10,
+  "projecoes": [
+    {
+      "n": 11,
+      "segundos": 3.8994606310052404
+    },
+    {
+      "n": 12,
+      "segundos": 46.793527572062885
+    },
+    {
+      "n": 13,
+      "segundos": 608.3158584368175
+    }
+  ]
+}

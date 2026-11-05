@@ -197,4 +197,10 @@ async function atualizar() {
   } catch (erro) { aviso('Conexão interrompida. Confira se o servidor continua aberto no terminal. ' + erro.message); }
   finally { setTimeout(atualizar, 1200); }
 }
-plano(); atualizar();
+async function carregarGaleria() {
+  try {
+    const graficos = await api('/api/graficos');
+    $('galeria').innerHTML = graficos.map((g, i) => `<article><h3>${i+1}. ${seguro(g.titulo)}</h3><p>${seguro(g.descricao)}</p>${g.disponivel ? `<a href="${g.url}" download="${seguro(g.arquivo)}"><img src="${g.url}" alt="${seguro(g.titulo)}" loading="lazy"><span>Baixar PNG ↓</span></a>` : '<p>Gráfico indisponível. Gere os arquivos com grafico.py após a coleta correspondente.</p>'}</article>`).join('');
+  } catch (erro) { $('galeria').textContent = erro.message; }
+}
+plano(); atualizar(); carregarGaleria();

@@ -5,6 +5,8 @@ import json
 import math
 import os
 from pathlib import Path
+from catalogo_graficos import GRAFICOS
+from web.experimentos import resumo
 
 
 def inteiro(valor):
@@ -44,6 +46,51 @@ def gerar(pasta='resultados', destino='RELATORIO.md'):
     else:
         raise ValueError('O experimento ainda está em andamento')
     imagem = Path(os.path.relpath(pasta / 'comparacao.png', Path(destino).parent)).as_posix()
+    figuras = []
+    for i, (nome, titulo, descricao) in enumerate(GRAFICOS, 1):
+        arquivo = pasta / 'graficos' / nome
+        if arquivo.is_file():
+            caminho = Path(os.path.relpath(arquivo, Path(destino).parent)).as_posix()
+            figuras.append(f'### Gráfico {i} — {titulo}\n\n![{titulo}]({caminho})\n\n{descricao}')
+    if figuras:
+        figuras = '\n\n'.join(figuras)
+    else:
+        figuras = f'![Tempos medidos e curva fatorial.]({imagem})'
+    complemento = ''
+    for nome, titulo in (('origem', 'Fixação da origem'), ('metodos', 'Métodos de solução')):
+        arquivo = pasta / 'complementares' / (nome + '.json')
+        if arquivo.is_file():
+            registro = json.loads(arquivo.read_text(encoding='utf-8'))
+            if registro['estado'] != 'concluido':
+                raise ValueError('Coleta complementar não concluída')
+            c = registro['config']
+            ambiente = registro['ambiente']
+            faixa = f"{c['fim']} cidades" if c['inicio'] == c['fim'] else f"{c['inicio']} a {c['fim']} cidades"
+            fonte = Path(os.path.relpath(arquivo, Path(destino).parent)).as_posix()
+            complemento += (f"\n\n**{titulo}:** coleta de {faixa}, "
+                            f"{c['repeticoes']} repetições, semente {c['semente']}, "
+                            f"{len(registro['amostras'])} chamadas completas. "
+                            f"Ambiente: Python {ambiente['python']}, `{ambiente['sistema']}`. "
+                            f"Registros em [{nome}.json]({fonte}).")
+            linhas = resumo(registro['amostras'])
+            if nome == 'origem':
+                n = max(d['n'] for d in linhas)
+                fixo = next(d for d in linhas if d['n'] == n and d['fixar'])
+                livre = next(d for d in linhas if d['n'] == n and not d['fixar'])
+                complemento += (f" Em n = {n}, as medianas foram {decimal(fixo['mediana'])} s "
+                                f"com origem fixa e {decimal(livre['mediana'])} s com origem livre. "
+                                f"A razão dos tempos foi {decimal(livre['mediana']/fixo['mediana'], 2)}, "
+                                f"enquanto a razão das contagens de rotas foi exatamente {n}.")
+            else:
+                custos = {d['algoritmo']: d['custo'] for d in linhas}
+                if custos['bruta'] != custos['held_karp']:
+                    raise ValueError('Os métodos exatos divergiram na coleta complementar')
+                complemento += (f" Força bruta e Held–Karp encontraram custo {custos['bruta']}; "
+                                f"o vizinho mais próximo encontrou {custos['guloso']}. "
+                                'O menor tempo do guloso não implica garantia de ótimo.')
+    if complemento:
+        complemento = ('\n\nAs coletas complementares dos gráficos 5 e 6 são independentes da tabela inicial '
+                       'e não entram na calibração de c.' + complemento)
     texto = f'''# Explorando a intratabilidade e a força bruta no Problema do Caixeiro Viajante
 
 **Autor:** João Victor Piumbini Cheroto
@@ -76,7 +123,7 @@ O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tam
 
 As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída, n = {maior}, a rota ótima foi {ultimo['rota']}, com custo {ultimo['custo_otimo']}. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
 
-![Tempos medidos e curva fatorial, em escalas linear e logarítmica.]({imagem})
+{figuras}{complemento}
 
 Fonte: resultados do experimento registrados em `benchmark.csv`.
 

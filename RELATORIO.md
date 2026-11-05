@@ -39,7 +39,47 @@ O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tam
 
 As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída, n = 12, a rota ótima foi 1-3-6-9-12-4-10-5-2-8-11-7-1, com custo 182. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
 
-![Tempos medidos e curva fatorial, em escalas linear e logarítmica.](resultados/comparacao.png)
+### Gráfico 1 — Tempo de execução — escala linear
+
+![Tempo de execução — escala linear](resultados/graficos/01_tempo_linear.png)
+
+Coleta inicial: mediana medida e curva c × n!, calibrada no maior tamanho concluído.
+
+### Gráfico 2 — Tempo de execução — escala logarítmica
+
+![Tempo de execução — escala logarítmica](resultados/graficos/02_tempo_log.png)
+
+Os mesmos tempos em escala logarítmica, para comparar também os tamanhos menores.
+
+### Gráfico 3 — Quantidade de rotas avaliadas
+
+![Quantidade de rotas avaliadas](resultados/graficos/03_rotas.png)
+
+Contagem observada por chamada, comparada com (n−1)! na coleta inicial.
+
+### Gráfico 4 — Quantidade de avaliações de arestas
+
+![Quantidade de avaliações de arestas](resultados/graficos/04_arestas.png)
+
+Contagem observada por chamada, comparada com n! na coleta inicial.
+
+### Gráfico 5 — Origem fixa e origem livre
+
+![Origem fixa e origem livre](resultados/graficos/05_origem.png)
+
+Coleta complementar: tempos dos dois modos, com a mesma matriz e três repetições por tamanho.
+
+### Gráfico 6 — Comparação dos métodos
+
+![Comparação dos métodos](resultados/graficos/06_metodos.png)
+
+Coleta complementar: força bruta, Held–Karp e vizinho mais próximo na mesma instância, com três repetições.
+
+As coletas complementares dos gráficos 5 e 6 são independentes da tabela inicial e não entram na calibração de c.
+
+**Fixação da origem:** coleta de 3 a 9 cidades, 3 repetições, semente 42, 42 chamadas completas. Ambiente: Python 3.12.14, `Linux-6.18.57-x86_64-with-glibc2.41`. Registros em [origem.json](resultados/complementares/origem.json). Em n = 9, as medianas foram 0,036296 s com origem fixa e 0,317955 s com origem livre. A razão dos tempos foi 8,76, enquanto a razão das contagens de rotas foi exatamente 9.
+
+**Métodos de solução:** coleta de 10 cidades, 3 repetições, semente 42, 9 chamadas completas. Ambiente: Python 3.12.14, `Linux-6.18.57-x86_64-with-glibc2.41`. Registros em [metodos.json](resultados/complementares/metodos.json). Força bruta e Held–Karp encontraram custo 144; o vizinho mais próximo encontrou 224. O menor tempo do guloso não implica garantia de ótimo.
 
 Fonte: resultados do experimento registrados em `benchmark.csv`.
 

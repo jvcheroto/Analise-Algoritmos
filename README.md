@@ -56,6 +56,31 @@ Os experimentos da interface ficam em `experimentos/`, no computador que executa
 
 Downloads feitos durante uma execução contêm os dados disponíveis naquele momento. Os novos experimentos não são enviados automaticamente ao GitHub.
 
+## Seis gráficos da atividade
+
+A aba **Gráficos da atividade** reúne:
+
+1. Tempo medido e c × n! em escala linear.
+2. Os mesmos dados em escala logarítmica.
+3. Rotas observadas e (n−1)! esperado.
+4. Avaliações de arestas observadas e n! esperado.
+5. Tempos com origem fixa e livre, de três a nove cidades.
+6. Tempos de força bruta, Held–Karp e vizinho mais próximo para dez cidades.
+
+Os gráficos 1 a 4 usam a coleta inicial. Os gráficos 5 e 6 usam duas coletas complementares: 42 chamadas para a comparação da origem e nove para a comparação de métodos. Os registros estão em `resultados/complementares/`, com configuração, ambiente e amostras. Nenhum tempo projetado é usado como medição.
+
+Os seis PNGs ficam em `resultados/graficos/` e aparecem também no relatório. A galeria apresenta essas coletas de referência; o gráfico da aba **Resultados** acompanha o experimento selecionado no histórico. Cada PNG pode ser baixado pela galeria.
+
+Para refazer as coletas complementares e atualizar os gráficos e o relatório:
+
+```powershell
+.\.venv\Scripts\python.exe coleta_complementar.py
+.\.venv\Scripts\python.exe grafico.py
+.\.venv\Scripts\python.exe relatorio.py
+```
+
+Essa sequência substitui os resultados complementares incluídos pelos tempos obtidos no computador da execução. Os seis gráficos só ficam completos após as duas coletas terminarem. Para novos benchmarks em outra pasta, `grafico.py --pasta CAMINHO` gera os quatro primeiros e inclui os complementares apenas quando seus registros estão presentes nessa pasta.
+
 ## Testes
 
 ```powershell
@@ -82,5 +107,7 @@ Os comandos criam uma coleta separada e geram seu gráfico e relatório. `relato
 - `iniciar_web.py` e `iniciar_web.bat`: inicialização.
 - `test_tsp.py` e `test_web.py`: testes automatizados.
 - `resultados/`: dados e gráficos da coleta inicial.
-- `grafico.py` e `relatorio.py`: geração dos materiais de terminal.
+- `grafico.py` e `relatorio.py`: geração dos gráficos e do relatório.
+- `coleta_complementar.py`: comparação da origem e dos métodos.
+- `catalogo_graficos.py`: títulos e arquivos da galeria.
 - `RELATORIO.md`: relatório da atividade.

@@ -200,6 +200,18 @@ class HTTP(unittest.TestCase):
             self.assertGreater(len(corpo),100)
         self.assertEqual(self.chamar('/../../tsp.py')[0],404)
 
+    def test_catalogo_e_imagens(self):
+        status, corpo = self.chamar('/api/graficos')
+        self.assertEqual(status, 200)
+        catalogo = json.loads(corpo)
+        self.assertEqual(len(catalogo), 6)
+        for grafico in catalogo:
+            self.assertTrue(grafico['disponivel'])
+            status, imagem = self.chamar(grafico['url'])
+            self.assertEqual(status, 200)
+            self.assertEqual(imagem[:8], b'\x89PNG\r\n\x1a\n')
+        self.assertEqual(self.chamar('/graficos/../../tsp.py')[0], 404)
+
     def test_origem_e_host(self):
         self.assertEqual(self.chamar('/api/experimentos',headers={'Host':'exemplo.com'})[0],403)
         self.assertEqual(self.chamar('/api/experimentos','POST',{}, {'Origin':'https://exemplo.com'})[0],403)
