@@ -135,7 +135,7 @@ Heurísticas e metaheurísticas podem obter boas soluções em menos tempo, mas 
 
 ## 5. Validação e reprodução
 
-A suíte contém 24 testes, abrangendo ótimo conhecido, fechamento do circuito, contagem fatorial, economia pela fixação da origem, empates, custos nulos, negativos e fracionários, entradas inválidas e preservação da matriz. Também compara os resultados com uma referência independente por programação dinâmica em 20 matrizes assimétricas, de 3 a 7 cidades.
+Os testes automatizados abrangem ótimo conhecido, fechamento do circuito, contagem fatorial, economia pela fixação da origem, empates, custos nulos, negativos e fracionários, entradas inválidas e preservação da matriz. Também compara os resultados com uma referência independente por programação dinâmica em 20 matrizes assimétricas, de 3 a 7 cidades.
 
 Os testes do benchmark verificam a gravação dos arquivos, a validação dos argumentos e o encerramento por tempo. Um teste usa uma interrupção simulada para conferir a preservação dos tamanhos anteriores; outro encerra um processo real por limite. Esses testes de infraestrutura são distintos das medições empíricas da seção 3.
 
@@ -151,6 +151,14 @@ python relatorio.py
 
 No Windows, `python` pode ser substituído por `py`; no Linux, por `python3`. A repetição do experimento altera os tempos. A geração do gráfico e do relatório deve ocorrer após o término do benchmark para manter a correspondência entre os arquivos.
 
+### 5.1. Aplicação local
+
+A interface organiza demonstrações de rotas, benchmarks e comparação de métodos. A enumeração admite tanto `itertools.permutations` quanto um gerador por trocas recursivas. O modo sem fixação permite medir diretamente o aumento no espaço de busca. A comparação complementar utiliza programação dinâmica Held–Karp e a heurística do vizinho mais próximo, sempre na mesma matriz.
+
+As novas coletas web são armazenadas separadamente em `experimentos/`. Cada chamada completa é preservada antes da seguinte. O limite de tempo e o cancelamento encerram a chamada em andamento, sem apresentar resultados parciais como ótimos. As posições dos nós são apenas ilustrativas: os custos são os valores da matriz, não distâncias geométricas.
+
+Os resultados da seção 3 pertencem exclusivamente à coleta inicial de terminal. As medições da interface não foram agregadas a essa amostra nem usadas para recalibrar sua curva. O README descreve a inicialização e a exportação de novos experimentos.
+
 ## 6. Conclusão
 
 A implementação confirmou as contagens de (n−1)! rotas e n! avaliações de arestas nos tamanhos concluídos. A fixação da origem remove redundâncias de rotação, mas mantém a complexidade Θ(n!). Os resultados evidenciam a diferença entre a viabilidade em instâncias pequenas e o crescimento do tempo ao aumentar o número de cidades.
@@ -159,7 +167,7 @@ O limite adotado e as projeções permitem discutir a intratabilidade prática s
 
 ## Referência
 
-UNIVERSIDADE VILA VELHA. **Unidade 04: Projeto e Análise de Algoritmos**. Material disponibilizado na disciplina, arquivo `Unidade_04 (6).pdf`, seções 4.1 e 4.2. Acesso em: 5 nov. 2026.
+UNIVERSIDADE VILA VELHA. **Unidade 04: Projeto e Análise de Algoritmos**. Material disponibilizado na disciplina, seções 4.1 e 4.2.
 '''
     Path(destino).write_text(texto, encoding='utf-8')
     return texto

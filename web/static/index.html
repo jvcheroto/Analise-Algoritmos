@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TSP · Laboratório de rotas</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<aside class="sidebar"><a class="brand" href="/">TSP<span>LABORATÓRIO DE ROTAS</span></a><p class="author">João Victor Piumbini Cheroto<br>Projeto e Análise de Algoritmos</p>
+<div class="side-label">EXPERIMENTOS</div><button id="novo" class="secondary">+ Configurar experimento</button><div id="historico" class="history"></div><div class="sidebar-foot">Execução local<br>Dados medidos no computador que executa o servidor.</div></aside>
+<main>
+<header><div class="eyebrow">COMPUTAÇÃO EXPERIMENTAL · TSP</div><h1>Uma cidade a mais.<br>Milhões de possibilidades.</h1><p>Explore rotas, conte operações e observe o crescimento da busca exaustiva.</p></header>
+<section class="panel" id="configuracao"><div class="section-head"><div><h2>Novo experimento</h2><p>Defina a pergunta antes de começar a medir.</p></div></div>
+<form id="formulario">
+<div class="form-grid"><label>O que investigar?<select id="tipo"><option value="demo">Encontrar a melhor rota</option><option value="benchmark" selected>Medir o crescimento fatorial</option><option value="comparacao">Comparar métodos de solução</option></select></label>
+<label id="inicio-label">De quantas cidades?<input id="inicio" type="number" min="3" max="16" value="3" required></label>
+<label>Até quantas cidades?<input id="fim" type="number" min="3" max="16" value="8" required></label>
+<label>Repetições por caso<input id="repeticoes" type="number" min="1" max="10" value="3" required></label>
+<label>Limite por execução (s)<input id="limite" type="number" min="1" max="3600" value="90" required></label>
+<label>Semente da instância<input id="semente" type="number" min="-1000000000" max="1000000000" value="42" required></label>
+<label>Geração das permutações<select id="gerador"><option value="biblioteca">Biblioteca Python</option><option value="manual">Trocas recursivas</option></select></label></div>
+<label class="check" id="origem-label"><input id="comparar" type="checkbox"> Medir também sem fixar a origem (até 9 cidades)</label>
+<div class="plan" id="plano"></div><div class="actions"><button id="iniciar" type="submit">Iniciar experimento <span>→</span></button><span class="hint">Uma execução por vez. A busca para ao atingir o limite.</span></div>
+</form></section>
+<div id="aviso" role="alert" hidden></div>
+<section id="experimento" hidden>
+<div class="experiment-head"><div><div class="eyebrow" id="data"></div><h2 id="titulo"></h2></div><span id="estado" class="badge"></span></div>
+<div class="panel progress-panel"><div class="progress-title"><strong id="mensagem" aria-live="polite"></strong><button id="cancelar" class="danger" hidden>Cancelar cálculo</button></div><progress id="progresso" value="0" max="1"></progress><p id="progresso-texto" class="hint"></p></div>
+<div class="metrics"><div><span>CHAMADAS CONCLUÍDAS</span><strong id="met-chamadas">0</strong></div><div><span>MAIOR INSTÂNCIA CONCLUÍDA</span><strong id="met-n">—</strong></div><div><span>MEDIANA DA MAIOR INSTÂNCIA</span><strong id="met-tempo">—</strong></div></div>
+<div class="toolbar"><div class="tabs" role="group" aria-label="Visualização"><button class="tab active" data-view="resultados">Resultados</button><button class="tab" data-view="rota">Rota e matriz</button><button class="tab" data-view="metodo">Método e condições</button></div><div class="downloads"><a id="salvar-grafico" href="#">Salvar gráfico</a><a id="baixar-csv">CSV</a><a id="baixar-zip">Baixar experimento ↓</a></div></div>
+<div id="view-resultados" class="view">
+<section class="panel"><div class="section-head"><div><h2>O custo de explorar todas as rotas</h2><p id="curva-info"></p></div><label class="check"><input id="log" type="checkbox" checked> Escala logarítmica</label></div><div id="grafico" class="chart"></div><div class="legend" id="legenda"><span class="blue">● Origem fixa</span><span class="orange">● Origem livre</span><span class="gray">— c × n!</span></div></section>
+<section class="panel"><h2>Resultados por tamanho e método</h2><p class="hint">Medianas calculadas apenas com chamadas completas. Contagens por chamada.</p><div class="table-scroll"><table><thead><tr><th>Cidades</th><th>Método</th><th>Repetições</th><th>Mediana (s)</th><th>Mín.–máx. (s)</th><th>Custo</th><th>Rotas</th><th>Arestas</th></tr></thead><tbody id="tabela"></tbody></table></div></section>
+<section class="panel"><h2>Além do intervalo medido</h2><p class="hint">Projeções pelo modelo c × n!. São estimativas, não novas execuções.</p><div id="projecoes" class="projections"></div></section>
+</div>
+<div id="view-rota" class="view" hidden><section class="panel"><div class="section-head"><div><h2>Um circuito completo</h2><p>As posições dos nós são ilustrativas. Os custos vêm da matriz.</p></div><label>Resultado<select id="selecionar-rota"></select></label></div><div id="mapa" class="route-map"></div><p id="caminho" class="path"></p><p id="rota-custo"></p></section><section class="panel"><h2>Matriz de custos</h2><div class="table-scroll" id="matriz"></div></section></div>
+<div id="view-metodo" class="view" hidden><section class="panel"><h2>Como interpretar este experimento</h2><div id="condicoes"></div><div class="method-grid"><article><h3>Força bruta</h3><p>Examina todas as permutações. Com origem fixa, avalia (n−1)! rotas e n! arestas. Cada circuito completo permite comparar seu custo com o melhor encontrado.</p></article><article><h3>Held–Karp</h3><p>Usa programação dinâmica por subconjuntos. É exato, com tempo O(n²·2ⁿ), mas também perde viabilidade em instâncias grandes.</p></article><article><h3>Vizinho mais próximo</h3><p>Escolhe a cidade não visitada de menor custo a cada passo. Executa em O(n²), mas não garante a melhor rota.</p></article></div><p>Uma rota é declarada ótima apenas para os métodos exatos após o término do cálculo. A função de custo inclui o retorno à origem. A duração total da tarefa não é usada no gráfico.</p></section></div>
+</section>
+<footer>Laboratório de rotas · Atividade investigativa sobre o Problema do Caixeiro Viajante</footer>
+</main></body></html>

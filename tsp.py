@@ -35,9 +35,27 @@ def custo_rota(matriz, rota):
     return total, avaliacoes
 
 
-def resolver(matriz):
+def permutacoes(elementos):
+    """Enumera permutações por trocas, sem armazenar o espaço de busca."""
+    itens = list(elementos)
+
+    def visitar(posicao):
+        if posicao == len(itens):
+            yield tuple(itens)
+            return
+        for indice in range(posicao, len(itens)):
+            itens[posicao], itens[indice] = itens[indice], itens[posicao]
+            yield from visitar(posicao + 1)
+            itens[posicao], itens[indice] = itens[indice], itens[posicao]
+
+    yield from visitar(0)
+
+
+def resolver(matriz, fixar_inicio=True, gerador='biblioteca'):
+    if not isinstance(matriz, (list, tuple)):
+        raise ValueError('A matriz deve ser uma sequência de linhas')
     n = len(matriz)
-    if n < 3 or any(len(linha) != n for linha in matriz):
+    if n < 3 or any(not isinstance(linha, (list, tuple)) or len(linha) != n for linha in matriz):
         raise ValueError('A matriz deve ser quadrada com n >= 3')
     if any(isinstance(valor, bool) or not isinstance(valor, (int, float))
            or (isinstance(valor, float) and not math.isfinite(valor))
@@ -48,17 +66,20 @@ def resolver(matriz):
         seguro = sys.float_info.max / (n + 1)
         if any(abs(v) > seguro for linha in matriz for v in linha):
             raise ValueError('Custos grandes demais para somar em ponto flutuante')
+    if type(fixar_inicio) is not bool or gerador not in ('biblioteca', 'manual'):
+        raise ValueError('Modo de enumeração inválido')
+    enumerar = itertools.permutations if gerador == 'biblioteca' else permutacoes
     melhor_custo = math.inf
     melhor_rota = None
     rotas = arestas = 0
-    for permutacao in itertools.permutations(range(1, n)):
-        rota = (0,) + permutacao
+    for permutacao in enumerar(range(1 if fixar_inicio else 0, n)):
+        rota = (0,) + permutacao if fixar_inicio else permutacao
         custo, operacoes = custo_rota(matriz, rota)
         rotas += 1
         arestas += operacoes
         if custo < melhor_custo:
             melhor_custo, melhor_rota = custo, rota
-    return melhor_custo, melhor_rota + (0,), rotas, arestas
+    return melhor_custo, melhor_rota + (melhor_rota[0],), rotas, arestas
 
 
 def _executar(matriz, conexao):
