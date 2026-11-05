@@ -50,13 +50,5 @@ Essa demonstração usa uma pasta separada e preserva os resultados incluídos n
 - `resultados/ambiente.json`: ambiente, parâmetros e eventual interrupção por tempo.
 - `resultados/comparacao.png` e `.pdf`: gráfico; o PDF dessa pasta contém apenas o gráfico.
 - `RELATORIO.md`: relatório completo, legível diretamente no GitHub.
-- `RELATORIO.pdf` e `RELATORIO.docx`: versões de leitura e edição do relatório incluído.
 
-Os resultados incluídos foram medidos em um ambiente em nuvem. Uma execução no computador pessoal produzirá outros tempos e possivelmente outro limite prático. Após um novo benchmark, executar novamente `grafico.py` e `relatorio.py`. As versões PDF e Word não são atualizadas por esses comandos.
-
-A exportação opcional do relatório para Word e PDF utiliza Pandoc; o PDF também exige XeLaTeX. Essas ferramentas não são necessárias para executar o algoritmo ou os testes:
-
-```bash
-pandoc RELATORIO.md -o RELATORIO.docx -M lang=pt-BR
-pandoc RELATORIO.md -o RELATORIO.pdf --pdf-engine=xelatex -M lang=pt-BR -V papersize=a4 -V mainfont="DejaVu Serif" -V geometry:margin=2cm -V fontsize=11pt
-```
+Os resultados incluídos foram medidos em um ambiente em nuvem. Uma execução no computador pessoal produzirá outros tempos e possivelmente outro limite prático. Após um novo benchmark, executar novamente `grafico.py` e `relatorio.py`.
