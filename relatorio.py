@@ -54,21 +54,19 @@ def gerar(pasta='resultados', destino='RELATORIO.md'):
 
 ## 1. Introdução e objetivo
 
-O Problema do Caixeiro Viajante (TSP) consiste em encontrar um circuito de menor custo que visite cada cidade uma única vez e retorne à origem. Este trabalho examina a solução por força bruta, relacionando a implementação e os resultados experimentais às seções 4.1 e 4.2 da Unidade 04.
-
-O objetivo é verificar o número de rotas examinadas, o custo de avaliação de cada rota e o crescimento do tempo de execução, além de discutir as limitações práticas da busca exaustiva.
+O Problema do Caixeiro Viajante (TSP) busca o circuito de menor custo que visite cada cidade uma vez e retorne à origem. Este trabalho implementa a força bruta e compara suas contagens e tempos de execução com a análise das seções 4.1 e 4.2 da Unidade 04.
 
 ## 2. Implementação e método experimental
 
-O grafo completo é representado por uma matriz simétrica, com diagonal zero e custos inteiros de 1 a 100. A geração utiliza `random.Random(42)`, permitindo reproduzir as instâncias. Os valores representam custos abstratos, sem exigência de desigualdade triangular. Cada tamanho utiliza uma matriz própria, mantida nas repetições; matrizes de tamanhos distintos não precisam representar o mesmo conjunto de cidades.
+O grafo completo é representado por uma matriz simétrica, com diagonal zero e custos inteiros de 1 a 100. A geração utiliza `random.Random(42)`, permitindo reproduzir as instâncias. Os custos não seguem necessariamente a desigualdade triangular. Para cada tamanho, a mesma matriz é usada em todas as repetições.
 
 A cidade de índice 0, correspondente a v₁, permanece fixa. A função `resolver` percorre as permutações dos outros índices, calcula o custo de cada circuito e guarda o menor valor. A função `custo_rota` soma as n arestas, incluindo o retorno à origem. As permutações são geradas sob demanda, sem armazenar todas simultaneamente. Como o enunciado adota (n−1)! rotas, os dois sentidos de um circuito são avaliados mesmo no grafo simétrico.
 
-O experimento solicitou tamanhos de 3 a {meta['max_n_solicitado']} cidades, com número de repetições igual a {meta['repeticoes']} por tamanho e limite de {decimal(meta['limite_por_execucao_s'], 0)} segundos por execução. Os tamanhos de 3 a {maior} foram concluídos integralmente. A medição usa `time.perf_counter()` dentro do processo de cálculo, incluindo validação da matriz, geração de permutações, avaliação, contagem e escolha do ótimo. A criação da matriz, o início do processo, a comunicação entre processos, a gravação dos arquivos e a geração dos gráficos ficam fora do tempo registrado no CSV.
+Foram solicitadas instâncias de 3 a {meta['max_n_solicitado']} cidades, com número de repetições igual a {meta['repeticoes']} por tamanho e limite de {decimal(meta['limite_por_execucao_s'], 0)} segundos por execução. Os tamanhos de 3 a {maior} foram concluídos integralmente. A medição usa `time.perf_counter()` dentro do processo de cálculo, incluindo validação da matriz, geração de permutações, avaliação, contagem e escolha do ótimo. A criação da matriz, o início do processo, a comunicação entre processos, a gravação dos arquivos e a geração dos gráficos ficam fora do tempo registrado no CSV.
 
-Os resultados foram obtidos em ambiente em nuvem, com Python {meta['python']} e sistema `{meta['sistema']}`. O cálculo é sequencial; a criação de um processo separado serve apenas para permitir o encerramento por tempo. Não foi realizado um teste no computador pessoal do autor. Os tempos dependem das condições desta máquina e da carga do sistema.
+Ambiente registrado na coleta: Python {meta['python']}, sistema `{meta['sistema']}`. As chamadas são sequenciais, cada uma em um processo separado para permitir o encerramento por tempo. Hardware e carga do sistema influenciam as medições.
 
-Cada repetição concluída tem suas contagens verificadas. O CSV registra os tempos individuais, a mediana, o mínimo e o máximo. Cada tamanho completo é gravado antes do início do seguinte. Uma tentativa interrompida fica registrada em `ambiente.json` e não é apresentada como resultado completo.
+O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tamanho concluído. As contagens são verificadas após cada chamada. Interrupções ficam registradas em `ambiente.json`.
 
 ## 3. Resultados experimentais
 
@@ -82,7 +80,7 @@ As contagens coincidiram com as expressões teóricas em todas as repetições c
 
 Fonte: resultados do experimento registrados em `benchmark.csv`.
 
-A curva de comparação é f(n) = c × n!, com c = {constante:.8e} s por avaliação de aresta contada. A calibração utiliza a mediana do maior tamanho concluído, dividida por seu fatorial. A coincidência nesse ponto decorre da calibração; a tendência deve ser examinada nos demais pontos. Para tamanhos pequenos, custos fixos e variações de execução têm maior influência relativa. O experimento é compatível com o crescimento fatorial, enquanto a dedução assintótica decorre da estrutura do algoritmo.
+A curva f(n) = c × n! usa c = {constante:.8e} s, calculado pela mediana do maior tamanho concluído dividida por seu fatorial. A coincidência nesse ponto é consequência da calibração. Os demais pontos permitem comparar a tendência, com maior influência dos custos fixos nos tamanhos pequenos. As medições são compatíveis com o crescimento fatorial; a demonstração de Θ(n!) vem da contagem de operações.
 
 ## 4. Análise e discussão
 
@@ -98,15 +96,15 @@ O laço de `custo_rota` executa n iterações, consultando e somando uma aresta 
 
 Com R = (n−1)! rotas, a quantidade de avaliações de arestas é A(n) = n × (n−1)! = n!. O quociente A(n)/R foi igual a n nos resultados. Portanto, o tempo da implementação é Θ(n!). A contagem n! não corresponde a todas as instruções da CPU: criação de tuplas, comparações e atualização de contadores também contribuem para o tempo.
 
-A matriz ocupa Θ(n²) de memória, enquanto a geração e a avaliação mantêm espaço adicional linear em n. O principal impedimento observado nesta abordagem é o tempo de execução, e não o armazenamento de todas as rotas.
+A matriz ocupa Θ(n²) de memória. A geração e a avaliação usam espaço adicional linear em n, pois as rotas não são armazenadas simultaneamente.
 
 ### 4.3. Limiar prático da intratabilidade
 
 A maior instância concluída foi n = {maior}, com mediana de {decimal(tempo)} segundos. {limite}
 
-O critério de parada estabelece um limite prático para este experimento, não um tamanho máximo absoluto suportado pelo hardware. Uma execução mais longa poderia concluir outra instância.
+O limite de tempo é o critério de parada adotado. Ele não determina o maior tamanho que a máquina conseguiria resolver com mais tempo.
 
-A tabela seguinte contém somente projeções obtidas com a constante calibrada. Nenhum desses valores deve ser interpretado como um tempo efetivamente medido:
+As projeções abaixo usam a mesma constante c. Esses tempos não foram medidos:
 
 | n | Rotas previstas | Avaliações de arestas previstas | Tempo projetado (s) |
 |---|---:|---:|---:|
@@ -137,7 +135,7 @@ Heurísticas e metaheurísticas podem obter boas soluções em menos tempo, mas 
 
 Os testes automatizados abrangem ótimo conhecido, fechamento do circuito, contagem fatorial, economia pela fixação da origem, empates, custos nulos, negativos e fracionários, entradas inválidas e preservação da matriz. Também comparam os resultados com uma referência independente por programação dinâmica em 20 matrizes assimétricas, de 3 a 7 cidades.
 
-Os testes do benchmark verificam a gravação dos arquivos, a validação dos argumentos e o encerramento por tempo. Um teste usa uma interrupção simulada para conferir a preservação dos tamanhos anteriores; outro encerra um processo real por limite. Esses testes de infraestrutura são distintos das medições empíricas da seção 3.
+Os testes do benchmark verificam os argumentos, a gravação dos resultados e a preservação das chamadas concluídas após uma interrupção. O limite de tempo também é exercitado com um processo real. Os tempos da suíte de testes não compõem o benchmark.
 
 Comandos de reprodução no PowerShell, executados na pasta do projeto:
 
@@ -150,21 +148,17 @@ py -m venv .venv
 .\\.venv\\Scripts\\python.exe relatorio.py
 ```
 
-Os comandos utilizam o Python do ambiente virtual, sem necessidade de ativá-lo no PowerShell. A repetição do experimento altera os tempos. A geração do gráfico e do relatório deve ocorrer após o término do benchmark para manter a correspondência entre os arquivos.
+Após uma nova coleta, executar `grafico.py` e `relatorio.py` para atualizar os materiais com os tempos obtidos.
 
 ### 5.1. Aplicação local
 
-A interface organiza demonstrações de rotas, benchmarks e comparação de métodos. A enumeração admite tanto `itertools.permutations` quanto um gerador por trocas recursivas. O modo sem fixação permite medir diretamente o aumento no espaço de busca. A comparação complementar utiliza programação dinâmica Held–Karp e a heurística do vizinho mais próximo, sempre na mesma matriz.
+A aplicação oferece demonstração de rotas, benchmark com e sem origem fixa e comparação com Held–Karp e vizinho mais próximo. A enumeração pode usar `itertools.permutations` ou trocas recursivas.
 
-As novas coletas web são armazenadas separadamente em `experimentos/`. Cada chamada completa é preservada antes da seguinte. O limite de tempo e o cancelamento encerram a chamada em andamento, sem apresentar resultados parciais como ótimos. As posições dos nós são apenas ilustrativas: os custos são os valores da matriz, não distâncias geométricas.
-
-Os resultados da seção 3 pertencem exclusivamente à coleta inicial de terminal. As medições da interface não foram agregadas a essa amostra nem usadas para recalibrar sua curva. O README descreve a inicialização e a exportação de novos experimentos.
+As coletas da interface ficam em `experimentos/` e não foram agregadas aos resultados da seção 3. No desenho da rota, as posições dos nós são ilustrativas; os custos vêm da matriz. As instruções de execução e exportação estão no README.
 
 ## 6. Conclusão
 
-A implementação confirmou as contagens de (n−1)! rotas e n! avaliações de arestas nos tamanhos concluídos. A fixação da origem remove redundâncias de rotação, mas mantém a complexidade Θ(n!). Os resultados evidenciam a diferença entre a viabilidade em instâncias pequenas e o crescimento do tempo ao aumentar o número de cidades.
-
-O limite adotado e as projeções permitem discutir a intratabilidade prática sem confundir uma execução interrompida com um resultado completo. A busca exaustiva garante o ótimo quando termina; estratégias mais rápidas, como a escolha gananciosa, não oferecem essa garantia em geral.
+As contagens observadas confirmaram (n−1)! rotas e n! avaliações de arestas. Fixar a origem reduz o trabalho redundante, mas mantém a complexidade Θ(n!). A busca foi concluída até n = {maior}; as instâncias seguintes foram discutidas por projeção. O crescimento fatorial limita a aplicação da força bruta, apesar da garantia de ótimo nas execuções completas. Heurísticas reduzem o custo da busca, mas não oferecem a mesma garantia em geral.
 
 ## Referência
 

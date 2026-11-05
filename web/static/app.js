@@ -75,7 +75,7 @@ function renderizar() {
   $('cancelar').hidden = r.estado !== 'executando';
   $('cancelar').disabled = false;
   $('progresso').max = r.plano_total || 1; $('progresso').value = r.amostras.length;
-  $('progresso-texto').textContent = `${r.amostras.length} de ${r.plano_total} chamadas concluídas. O progresso conta chamadas, não estima o tempo restante.`;
+  $('progresso-texto').textContent = `${r.amostras.length} de ${r.plano_total} chamadas concluídas. Progresso por chamada concluída.`;
   $('met-chamadas').textContent = r.amostras.length;
   const maior = linhas.length ? Math.max(...linhas.map(d => d.n)) : null;
   const linhaMaior = linhas.find(d => d.n === maior && d.algoritmo === 'bruta' && d.fixar);
@@ -121,7 +121,7 @@ function desenharGrafico() {
     conteudo += `<line x1="${L}" x2="${W-R}" y1="${pos}" y2="${pos}" stroke="#e0e7df"/><text x="${L-10}" y="${pos+4}" text-anchor="end" font-size="11" fill="#657470">${label}</text>`;
   }
   if (unicos.length === 1) {
-    $('curva-info').textContent = 'Uma única instância: comparação de tempos. São necessários vários tamanhos para observar o crescimento.';
+    $('curva-info').textContent = 'Comparação de tempos para uma instância. O crescimento exige medições de vários tamanhos.';
     linhas.forEach((d, i) => {
       const x = L + (i + .5) * (W - L - R) / linhas.length;
       conteudo += `<line x1="${x}" x2="${x}" y1="${y(d.mediana)}" y2="${H-B}" stroke="${d.algoritmo === 'guloso' ? '#d47b37' : '#247aa5'}" stroke-width="22"/><text x="${x}" y="${H-B+20}" text-anchor="middle" font-size="11">${seguro(nomes[d.algoritmo])}</text><circle cx="${x}" cy="${y(d.mediana)}" r="4" fill="#176d64"><title>${numero(d.mediana,9)} s</title></circle>`;

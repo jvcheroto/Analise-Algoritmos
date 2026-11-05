@@ -1,10 +1,8 @@
-"""Métodos complementares para comparação na mesma instância do TSP."""
 from functools import lru_cache
 from tsp import custo_rota, resolver
 
 
 def validar(matriz):
-    # Os experimentos da aplicação usam custos inteiros de 1 a 100.
     n = len(matriz)
     if n < 3 or any(len(linha) != n for linha in matriz):
         raise ValueError('Matriz quadrada com pelo menos três cidades exigida')

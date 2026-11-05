@@ -1,4 +1,3 @@
-"""Execução sequencial, cancelamento e armazenamento dos experimentos locais."""
 import copy
 import csv
 from datetime import datetime, timezone
@@ -138,7 +137,7 @@ class Gerenciador:
                 self.registros[identificador] = registro
                 self._salvar(registro)
             except (ValueError, KeyError, TypeError):
-                # Arquivos danificados permanecem no disco para inspeção.
+                # Preserva o arquivo inválido e carrega os demais.
                 continue
         if importar_inicial:
             self._importar()
@@ -162,7 +161,7 @@ class Gerenciador:
             config=dict(tipo='benchmark', inicio=3, fim=meta['max_n_solicitado'], repeticoes=meta['repeticoes'],
                         semente=meta['semente'], limite=meta['limite_por_execucao_s'], comparar_origem=False, gerador='biblioteca'),
             ambiente=meta, amostras=amostras, plano_total=(meta['max_n_solicitado'] - 2) * meta['repeticoes'],
-            mensagem='Resultados preservados do experimento original; não foram recalculados pela interface.', atual=None)
+            mensagem='Coleta inicial de terminal. Os resultados são anteriores às execuções da interface.', atual=None)
 
     def _salvar(self, registro):
         caminho = self.pasta / (registro['id'] + '.json')

@@ -83,7 +83,6 @@ def resolver(matriz, fixar_inicio=True, gerador='biblioteca'):
 
 
 def _executar(matriz, conexao):
-    """Processo isolado para permitir encerrar uma execução demorada."""
     try:
         inicio = time.perf_counter()
         resultado = resolver(matriz)
@@ -132,7 +131,6 @@ def benchmark(max_n=10, repeticoes=3, destino='resultados', limite=90.0):
     arquivo_meta.write_text(json.dumps(metadados, indent=2, ensure_ascii=False), encoding='utf-8')
     campos = ['n', 'rotas', 'arestas', 'segundos_mediana', 'segundos_min',
               'segundos_max', 'custo_otimo', 'rota', 'tempos_s']
-    # Cada tamanho concluído é salvo imediatamente, mesmo se o próximo expirar.
     with (pasta / 'benchmark.csv').open('w', newline='', encoding='utf-8') as arquivo:
         escritor = csv.DictWriter(arquivo, fieldnames=campos, lineterminator='\n')
         escritor.writeheader()

@@ -1,4 +1,3 @@
-"""Testes da aplicação local e dos modos complementares de cálculo."""
 import csv
 import http.client
 import io

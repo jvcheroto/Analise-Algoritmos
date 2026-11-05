@@ -19,7 +19,6 @@ def gerar(pasta='resultados'):
         raise ValueError('O CSV não contém execuções concluídas')
     ns = [int(d['n']) for d in dados]
     tempos = [float(d['segundos_mediana']) for d in dados]
-    # Calibração pela maior instância medida, onde o overhead pesa menos.
     c = tempos[-1] / math.factorial(ns[-1])
     teoricos = [c * math.factorial(n) for n in ns]
     fig, eixos = plt.subplots(1, 2, figsize=(12, 4.5))

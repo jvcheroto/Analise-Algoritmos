@@ -1,4 +1,3 @@
-"""Servidor HTTP restrito ao computador local, sem dependências web externas."""
 import io
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer

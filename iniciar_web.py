@@ -1,4 +1,4 @@
-"""Inicia o laboratório de TSP pelo terminal do Windows."""
+"""Laboratório de rotas — aplicação local."""
 import argparse
 import multiprocessing
 from pathlib import Path
