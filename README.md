@@ -25,7 +25,7 @@ Se a porta estiver ocupada:
 
 Nesse caso, usar **http://127.0.0.1:5001**. Não é necessário ativar a `.venv` nem alterar a política do PowerShell.
 
-No Linux ou macOS, criar o ambiente com `python3 -m venv .venv` e usar `.venv/bin/python` nos comandos seguintes. A extensão Python do VS Code é recomendada para editar e executar o código, mas não é necessária para abrir a aplicação.
+As instruções deste projeto adotam Windows e PowerShell. A extensão Python do VS Code é recomendada para editar e executar o código, mas não é necessária para abrir a aplicação.
 
 ## O que investigar
 

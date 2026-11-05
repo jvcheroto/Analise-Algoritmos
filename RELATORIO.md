@@ -100,21 +100,22 @@ Heurísticas e metaheurísticas podem obter boas soluções em menos tempo, mas 
 
 ## 5. Validação e reprodução
 
-Os testes automatizados abrangem ótimo conhecido, fechamento do circuito, contagem fatorial, economia pela fixação da origem, empates, custos nulos, negativos e fracionários, entradas inválidas e preservação da matriz. Também compara os resultados com uma referência independente por programação dinâmica em 20 matrizes assimétricas, de 3 a 7 cidades.
+Os testes automatizados abrangem ótimo conhecido, fechamento do circuito, contagem fatorial, economia pela fixação da origem, empates, custos nulos, negativos e fracionários, entradas inválidas e preservação da matriz. Também comparam os resultados com uma referência independente por programação dinâmica em 20 matrizes assimétricas, de 3 a 7 cidades.
 
 Os testes do benchmark verificam a gravação dos arquivos, a validação dos argumentos e o encerramento por tempo. Um teste usa uma interrupção simulada para conferir a preservação dos tamanhos anteriores; outro encerra um processo real por limite. Esses testes de infraestrutura são distintos das medições empíricas da seção 3.
 
-Comandos de reprodução, executados na pasta do projeto:
+Comandos de reprodução no PowerShell, executados na pasta do projeto:
 
-```bash
-python -m pip install -r requirements.txt
-python -m unittest -v
-python tsp.py --max-n 13 --repeticoes 3 --limite 90
-python grafico.py
-python relatorio.py
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m unittest -v
+.\.venv\Scripts\python.exe tsp.py --max-n 13 --repeticoes 3 --limite 90
+.\.venv\Scripts\python.exe grafico.py
+.\.venv\Scripts\python.exe relatorio.py
 ```
 
-No Windows, `python` pode ser substituído por `py`; no Linux, por `python3`. A repetição do experimento altera os tempos. A geração do gráfico e do relatório deve ocorrer após o término do benchmark para manter a correspondência entre os arquivos.
+Os comandos utilizam o Python do ambiente virtual, sem necessidade de ativá-lo no PowerShell. A repetição do experimento altera os tempos. A geração do gráfico e do relatório deve ocorrer após o término do benchmark para manter a correspondência entre os arquivos.
 
 ### 5.1. Aplicação local
 
