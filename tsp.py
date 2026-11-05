@@ -3,14 +3,19 @@ import argparse
 import csv
 import itertools
 import math
+import json
+import multiprocessing
+import platform
+from datetime import datetime, timezone
 import random
 import statistics
+import sys
 import time
 from pathlib import Path
 
 
 def gerar_matriz(n, seed=42):
-    if n < 3:
+    if isinstance(n, bool) or not isinstance(n, int) or n < 3:
         raise ValueError('Use pelo menos três cidades')
     rng = random.Random(seed)
     matriz = [[0] * n for _ in range(n)]
@@ -34,6 +39,15 @@ def resolver(matriz):
     n = len(matriz)
     if n < 3 or any(len(linha) != n for linha in matriz):
         raise ValueError('A matriz deve ser quadrada com n >= 3')
+    if any(isinstance(valor, bool) or not isinstance(valor, (int, float))
+           or (isinstance(valor, float) and not math.isfinite(valor))
+           for linha in matriz for valor in linha):
+        raise ValueError('Os custos devem ser números reais finitos')
+    if any(isinstance(v, float) for linha in matriz for v in linha):
+        # Margem para evitar overflow na soma de n custos de ponto flutuante.
+        seguro = sys.float_info.max / (n + 1)
+        if any(abs(v) > seguro for linha in matriz for v in linha):
+            raise ValueError('Custos grandes demais para somar em ponto flutuante')
     melhor_custo = math.inf
     melhor_rota = None
     rotas = arestas = 0
@@ -47,33 +61,91 @@ def resolver(matriz):
     return melhor_custo, melhor_rota + (0,), rotas, arestas
 
 
-def benchmark(max_n=10, repeticoes=3, destino='resultados'):
-    if not 3 <= max_n <= 11:
-        raise ValueError('Por segurança, use 3 <= max-n <= 11')
-    if repeticoes < 1:
-        raise ValueError('Use pelo menos uma repetição')
+def _executar(matriz, conexao):
+    """Processo isolado para permitir encerrar uma execução demorada."""
+    try:
+        inicio = time.perf_counter()
+        resultado = resolver(matriz)
+        segundos = time.perf_counter() - inicio
+        conexao.send((resultado, segundos))
+    finally:
+        conexao.close()
+
+
+def executar_com_limite(matriz, limite):
+    contexto = multiprocessing.get_context('spawn')
+    leitura, escrita = contexto.Pipe(duplex=False)
+    processo = contexto.Process(target=_executar, args=(matriz, escrita))
+    processo.start()
+    escrita.close()
+    try:
+        if not leitura.poll(limite):
+            return None
+        try:
+            return leitura.recv()
+        except EOFError as erro:
+            raise RuntimeError('O processo de cálculo terminou sem resultado') from erro
+    finally:
+        if processo.is_alive():
+            processo.terminate()
+        processo.join()
+        leitura.close()
+
+
+def benchmark(max_n=10, repeticoes=3, destino='resultados', limite=90.0):
+    if isinstance(max_n, bool) or not isinstance(max_n, int) or not 3 <= max_n <= 20:
+        raise ValueError('Use 3 <= max-n <= 20')
+    if isinstance(repeticoes, bool) or not isinstance(repeticoes, int) or repeticoes < 1:
+        raise ValueError('Use pelo menos uma repetição inteira')
+    if not math.isfinite(limite) or limite <= 0:
+        raise ValueError('O limite deve ser positivo e finito')
     pasta = Path(destino)
     pasta.mkdir(parents=True, exist_ok=True)
     linhas = []
-    for n in range(3, max_n + 1):
-        matriz = gerar_matriz(n)
-        tempos = []
-        for _ in range(repeticoes):
-            inicio = time.perf_counter()
-            custo, rota, rotas, arestas = resolver(matriz)
-            tempos.append(time.perf_counter() - inicio)
-        assert rotas == math.factorial(n - 1)
-        assert arestas == math.factorial(n)
-        linha = dict(n=n, rotas=rotas, arestas=arestas,
-                     segundos_mediana=statistics.median(tempos),
-                     segundos_min=min(tempos), segundos_max=max(tempos),
-                     custo_otimo=custo, rota='-'.join(str(v + 1) for v in rota))
-        linhas.append(linha)
-        print(linha, flush=True)
-    with (pasta / 'benchmark.csv').open('w', newline='') as arquivo:
-        escritor = csv.DictWriter(arquivo, fieldnames=linhas[0].keys())
+    metadados = dict(inicio_utc=datetime.now(timezone.utc).isoformat(),
+                     python=platform.python_version(), sistema=platform.platform(),
+                     processador=platform.processor(), semente=42,
+                     repeticoes=repeticoes, limite_por_execucao_s=limite,
+                     max_n_solicitado=max_n, estado='em andamento')
+    arquivo_meta = pasta / 'ambiente.json'
+    arquivo_meta.write_text(json.dumps(metadados, indent=2, ensure_ascii=False), encoding='utf-8')
+    campos = ['n', 'rotas', 'arestas', 'segundos_mediana', 'segundos_min',
+              'segundos_max', 'custo_otimo', 'rota', 'tempos_s']
+    # Cada tamanho concluído é salvo imediatamente, mesmo se o próximo expirar.
+    with (pasta / 'benchmark.csv').open('w', newline='', encoding='utf-8') as arquivo:
+        escritor = csv.DictWriter(arquivo, fieldnames=campos, lineterminator='\n')
         escritor.writeheader()
-        escritor.writerows(linhas)
+        arquivo.flush()
+        for n in range(3, max_n + 1):
+            matriz = gerar_matriz(n)
+            tempos = []
+            for repeticao in range(1, repeticoes + 1):
+                print(f'n={n}, repetição {repeticao}/{repeticoes}: iniciando', flush=True)
+                medicao = executar_com_limite(matriz, limite)
+                if medicao is None:
+                    metadados.update(estado='limite de tempo', n_interrompido=n,
+                                     repeticao_interrompida=repeticao,
+                                     repeticoes_concluidas_no_n=tempos,
+                                     fim_utc=datetime.now(timezone.utc).isoformat())
+                    arquivo_meta.write_text(json.dumps(metadados, indent=2, ensure_ascii=False), encoding='utf-8')
+                    print(f'n={n}: processo encerrado após limite de {limite:g} s; '
+                          'nenhum ótimo é declarado para a execução interrompida.', flush=True)
+                    return linhas
+                (custo, rota, rotas, arestas), segundos = medicao
+                if rotas != math.factorial(n - 1) or arestas != math.factorial(n):
+                    raise RuntimeError('Contagens incompatíveis com a busca completa')
+                tempos.append(segundos)
+                print(f'Concluído: {segundos:.6f} s', flush=True)
+            linha = dict(n=n, rotas=rotas, arestas=arestas,
+                         segundos_mediana=statistics.median(tempos),
+                         segundos_min=min(tempos), segundos_max=max(tempos),
+                         custo_otimo=custo, rota='-'.join(str(v + 1) for v in rota),
+                         tempos_s=json.dumps(tempos))
+            linhas.append(linha)
+            escritor.writerow(linha)
+            arquivo.flush()
+    metadados.update(estado='concluído', fim_utc=datetime.now(timezone.utc).isoformat())
+    arquivo_meta.write_text(json.dumps(metadados, indent=2, ensure_ascii=False), encoding='utf-8')
     return linhas
 
 
@@ -81,6 +153,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--max-n', type=int, default=10)
     parser.add_argument('--repeticoes', type=int, default=3)
+    parser.add_argument('--limite', type=float, default=90,
+                        help='Limite em segundos por execução, incluindo início do processo')
     parser.add_argument('--destino', default='resultados')
     args = parser.parse_args()
-    benchmark(args.max_n, args.repeticoes, args.destino)
+    try:
+        benchmark(args.max_n, args.repeticoes, args.destino, args.limite)
+    except ValueError as erro:
+        parser.error(str(erro))

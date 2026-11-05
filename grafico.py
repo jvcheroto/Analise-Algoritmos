@@ -2,8 +2,10 @@
 import csv
 import math
 import os
+import argparse
+import tempfile
 from pathlib import Path
-os.environ.setdefault('MPLCONFIGDIR', '/tmp/tsp-matplotlib')
+os.environ.setdefault('MPLCONFIGDIR', str(Path(tempfile.gettempdir()) / 'tsp-matplotlib'))
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -13,6 +15,8 @@ def gerar(pasta='resultados'):
     pasta = Path(pasta)
     with (pasta / 'benchmark.csv').open() as arquivo:
         dados = list(csv.DictReader(arquivo))
+    if not dados:
+        raise ValueError('O CSV não contém execuções concluídas')
     ns = [int(d['n']) for d in dados]
     tempos = [float(d['segundos_mediana']) for d in dados]
     # Calibração pela maior instância medida, onde o overhead pesa menos.
@@ -20,7 +24,7 @@ def gerar(pasta='resultados'):
     teoricos = [c * math.factorial(n) for n in ns]
     fig, eixos = plt.subplots(1, 2, figsize=(12, 4.5))
     for eixo in eixos:
-        eixo.plot(ns, tempos, 'o-', label='Mediana de 3 execuções')
+        eixo.plot(ns, tempos, 'o-', label='Tempo mediano medido')
         eixo.plot(ns, teoricos, '--', label='c × n! (calibrada no maior n)')
         eixo.set(xlabel='Número de cidades (n)', ylabel='Tempo (segundos)', xticks=ns)
         eixo.grid(True, alpha=.3)
@@ -33,10 +37,12 @@ def gerar(pasta='resultados'):
     fig.savefig(pasta / 'comparacao.pdf')
     plt.close(fig)
     print(f'Constante calibrada c = {c:.12g} s/operação contada')
-    for n in (11, 12, 13, 14, 15):
+    for n in range(ns[-1] + 1, ns[-1] + 4):
         print(f'PROJEÇÃO n={n}: {c * math.factorial(n):.3f} s')
     return c
 
 
 if __name__ == '__main__':
-    gerar()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--pasta', default='resultados')
+    gerar(parser.parse_args().pasta)

@@ -6,30 +6,57 @@ Projeto e Análise de Algoritmos — Universidade de Vila Velha
 
 05/11/2026
 
-Estudo experimental da solução por força bruta para o Problema do Caixeiro Viajante (TSP), com comparação entre os tempos medidos e a complexidade Θ(n!). O projeto reúne a implementação em Python, os resultados de 3 a 10 cidades e a discussão das questões propostas na atividade.
+Implementação exata do TSP por enumeração de rotas, com contagem de operações, medição de tempos e comparação com Θ(n!). O [relatório](RELATORIO.md) apresenta o método, os resultados e as respostas da atividade.
 
-O [relatório completo](RELATORIO.md) reúne o método, as tabelas, o gráfico e a discussão teórica.
+## Execução no VS Code
 
-## Execução
+Requisitos: Python 3.12 e a extensão Python da Microsoft. O benchmark usa somente a biblioteca padrão; a geração do gráfico exige Matplotlib.
 
-Requisitos: Python 3.12 e Matplotlib 3.10.8 para a geração do gráfico.
+1. Extrair o projeto e abrir a pasta que contém `tsp.py` no VS Code.
+2. Abrir **Terminal → Novo Terminal**.
+3. Executar os comandos abaixo, um por vez.
 
-```bash
-python3 -m pip install -r requirements.txt
-python3 -m unittest -v
-python3 tsp.py --max-n 10 --repeticoes 3
-python3 grafico.py
+No Windows:
+
+```powershell
+py -m pip install -r requirements.txt
+py -m unittest -v
+py tsp.py --max-n 13 --repeticoes 3 --limite 90
+py grafico.py
+py relatorio.py
 ```
 
-Os dados apresentados foram obtidos em um ambiente em nuvem, com três execuções por tamanho de instância. Uma nova execução substitui os arquivos de resultados; nesse caso, a tabela e a calibração do relatório também precisam acompanhar os novos valores. O benchmark aceita até 11 cidades para limitar a duração de execuções acidentais.
+No Linux, substituir `py` por `python3`; também é possível usar `python` quando esse for o comando da instalação local. Não é necessário digitar comandos no console interativo `>>>`.
 
-## Arquivos
+O benchmark imprime o início e o fim de cada repetição. Ao atingir o limite por execução, encerra o processo de cálculo e preserva os tamanhos já concluídos. A medição do algoritmo exclui o início do processo; o limite de espera inclui esse início. O limite é um critério experimental, não o máximo absoluto do computador.
 
-- `tsp.py`: implementação e benchmark.
-- `test_tsp.py`: testes de correção e contagem.
-- `grafico.py`: comparação entre os tempos e a curva c × n!.
-- `resultados/benchmark.csv`: tempos, contagens, custos e rotas.
-- `resultados/comparacao.png` e `.pdf`: gráfico comparativo.
-- `RELATORIO.md`: análise e respostas investigativas.
+Para uma demonstração rápida:
 
-O relatório distingue os tempos medidos das projeções para instâncias maiores.
+```powershell
+py tsp.py --max-n 8 --repeticoes 3 --limite 90 --destino demonstracao
+py grafico.py --pasta demonstracao
+py relatorio.py --pasta demonstracao --destino demonstracao/RELATORIO.md
+```
+
+Essa demonstração usa uma pasta separada e preserva os resultados incluídos no projeto. Para investigar tamanhos maiores, aumentar `--max-n` (até 20) e `--limite`, conforme o tempo disponível. A busca cresce fatorialmente; solicitar 20 cidades não significa que o cálculo terminará em tempo viável. O programa para na primeira repetição que atingir o limite.
+
+## Resultados e arquivos
+
+- `tsp.py`: geração da matriz, cálculo exato e benchmark.
+- `test_tsp.py`: testes de correção e funcionamento do experimento.
+- `grafico.py`: geração das curvas medida e teórica.
+- `relatorio.py`: atualização do texto, tabelas e projeções a partir dos resultados.
+- `resultados/benchmark.csv`: tamanhos completos, tempos individuais, mediana, mínimo, máximo, contagens, custo ótimo e rota.
+- `resultados/ambiente.json`: ambiente, parâmetros e eventual interrupção por tempo.
+- `resultados/comparacao.png` e `.pdf`: gráfico; o PDF dessa pasta contém apenas o gráfico.
+- `RELATORIO.md`: relatório completo, legível diretamente no GitHub.
+- `RELATORIO.pdf` e `RELATORIO.docx`: versões de leitura e edição do relatório incluído.
+
+Os resultados incluídos foram medidos em um ambiente em nuvem. Uma execução no computador pessoal produzirá outros tempos e possivelmente outro limite prático. Após um novo benchmark, executar novamente `grafico.py` e `relatorio.py`. As versões PDF e Word não são atualizadas por esses comandos.
+
+A exportação opcional do relatório para Word e PDF utiliza Pandoc; o PDF também exige XeLaTeX. Essas ferramentas não são necessárias para executar o algoritmo ou os testes:
+
+```bash
+pandoc RELATORIO.md -o RELATORIO.docx -M lang=pt-BR
+pandoc RELATORIO.md -o RELATORIO.pdf --pdf-engine=xelatex -M lang=pt-BR -V papersize=a4 -V mainfont="DejaVu Serif" -V geometry:margin=2cm -V fontsize=11pt
+```

@@ -1,4 +1,4 @@
-# Explorando a Intratabilidade e a Força Bruta no TSP
+# Explorando a intratabilidade e a força bruta no Problema do Caixeiro Viajante
 
 **Autor:** João Victor Piumbini Cheroto
 
@@ -6,96 +6,122 @@
 
 **Data:** 05/11/2026
 
-## 1. Objetivo e fundamentação
+## 1. Introdução e objetivo
 
-Este trabalho analisa a solução por força bruta para o Problema do Caixeiro Viajante (TSP), com o objetivo de comparar os resultados experimentais com a dedução apresentada nas seções 4.1.2–4.1.8 da Unidade 04. O circuito deve visitar todas as cidades uma única vez e retornar à origem, minimizando a soma dos custos.
+O Problema do Caixeiro Viajante (TSP) consiste em encontrar um circuito de menor custo que visite cada cidade uma única vez e retorne à origem. Este trabalho examina a solução por força bruta, relacionando a implementação e os resultados experimentais às seções 4.1 e 4.2 da Unidade 04.
 
-A fixação de v₁ como origem restringe o espaço de busca a R = (n−1)! permutações. Cada circuito contém n arestas e sua avaliação custa Θ(n). Portanto, n × (n−1)! = n! avaliações de arestas e tempo Θ(n!). A operação adotada na contagem é a avaliação de uma aresta. Por isso, n! expressa essa contagem, enquanto o tempo em segundos depende do ambiente de execução.
+O objetivo é verificar o número de rotas examinadas, o custo de avaliação de cada rota e o crescimento do tempo de execução, além de discutir as limitações práticas da busca exaustiva.
 
 ## 2. Implementação e método experimental
 
-As cidades são representadas por uma matriz simétrica de custos inteiros entre 1 e 100, com diagonal zero. A geração utiliza `random.Random(42)` para permitir a reprodução das instâncias. Os custos são abstratos e não estão sujeitos à desigualdade triangular. Para cada valor de n, a mesma matriz é utilizada nas três repetições.
+O grafo completo é representado por uma matriz simétrica, com diagonal zero e custos inteiros de 1 a 100. A geração utiliza `random.Random(42)`, permitindo reproduzir as instâncias. Os valores representam custos abstratos, sem exigência de desigualdade triangular. Cada tamanho utiliza uma matriz própria, mantida nas repetições; matrizes de tamanhos distintos não precisam representar o mesmo conjunto de cidades.
 
-A cidade de índice 0 (v₁) permanece fixa como ponto de partida. `itertools.permutations(range(1, n))` gera todas as permutações restantes, sem armazenar todas simultaneamente. `custo_rota` soma explicitamente as n arestas, incluindo a volta à origem. Durante a busca, o menor custo encontrado e a rota correspondente são armazenados. Embora o grafo seja simétrico, os dois sentidos de cada circuito são avaliados, de acordo com a contagem de (n−1)! estabelecida no enunciado.
+A cidade de índice 0, correspondente a v₁, permanece fixa. A função `resolver` percorre as permutações dos outros índices, calcula o custo de cada circuito e guarda o menor valor. A função `custo_rota` soma as n arestas, incluindo o retorno à origem. As permutações são geradas sob demanda, sem armazenar todas simultaneamente. Como o enunciado adota (n−1)! rotas, os dois sentidos de um circuito são avaliados mesmo no grafo simétrico.
 
-O experimento compreendeu três execuções para cada valor de n entre 3 e 10, cronometradas com `time.perf_counter()`. A mediana é apresentada na tabela, enquanto os tempos mínimo e máximo estão registrados no arquivo CSV. O intervalo medido inclui a geração das permutações, a avaliação, a contagem e a seleção da melhor rota. A geração da matriz, a escrita em disco e a elaboração dos gráficos ficam fora desse intervalo. A contagem de operações foi mantida em todas as execuções, pois também influencia o tempo medido.
+O experimento solicitou tamanhos de 3 a 13 cidades, com número de repetições igual a 3 por tamanho e limite de 90 segundos por execução. Os tamanhos de 3 a 12 foram concluídos integralmente. A medição usa `time.perf_counter()` dentro do processo de cálculo, incluindo validação da matriz, geração de permutações, avaliação, contagem e escolha do ótimo. A criação da matriz, o início do processo, a comunicação entre processos, a gravação dos arquivos e a geração dos gráficos ficam fora do tempo registrado no CSV.
 
-Os resultados analisados foram obtidos em um ambiente em nuvem com Linux x86_64 e Python 3.12.14. Essas condições delimitam a interpretação dos tempos, que podem variar conforme o hardware e a carga do sistema.
+Os resultados foram obtidos em ambiente em nuvem, com Python 3.12.14 e sistema `Linux-6.18.57-x86_64-with-glibc2.41`. O cálculo é sequencial; a criação de um processo separado serve apenas para permitir o encerramento por tempo. Não foi realizado um teste no computador pessoal do autor. Os tempos dependem das condições desta máquina e da carga do sistema.
+
+Cada repetição concluída tem suas contagens verificadas. O CSV registra os tempos individuais, a mediana, o mínimo e o máximo. Cada tamanho completo é gravado antes do início do seguinte. Uma tentativa interrompida fica registrada em `ambiente.json` e não é apresentada como resultado completo.
 
 ## 3. Resultados experimentais
 
-| n | Rotas medidas = (n−1)! | Arestas medidas = n! | Mediana (s) | Custo ótimo |
+| n | Rotas = (n−1)! | Avaliações de arestas = n! | Mediana (s) | Custo ótimo |
 |---|---:|---:|---:|---:|
-| 3 | 2 | 6 | 0,000003926 | 101 |
-| 4 | 6 | 24 | 0,000004436 | 150 |
-| 5 | 24 | 120 | 0,000012889 | 98 |
-| 6 | 120 | 720 | 0,000088411 | 157 |
-| 7 | 720 | 5.040 | 0,000486821 | 106 |
-| 8 | 5.040 | 40.320 | 0,004247971 | 127 |
-| 9 | 40.320 | 362.880 | 0,038855178 | 178 |
-| 10 | 362.880 | 3.628.800 | 0,355618710 | 144 |
+| 3 | 2 | 6 | 0,000019809 | 101 |
+| 4 | 6 | 24 | 0,000021172 | 150 |
+| 5 | 24 | 120 | 0,000069493 | 98 |
+| 6 | 120 | 720 | 0,000094060 | 157 |
+| 7 | 720 | 5.040 | 0,000520400 | 106 |
+| 8 | 5.040 | 40.320 | 0,003883072 | 127 |
+| 9 | 40.320 | 362.880 | 0,037319908 | 178 |
+| 10 | 362.880 | 3.628.800 | 0,353710332 | 144 |
+| 11 | 3.628.800 | 39.916.800 | 3,686878526 | 135 |
+| 12 | 39.916.800 | 479.001.600 | 43,504420408 | 182 |
 
-As contagens experimentais coincidiram com as fórmulas em todas as repetições. Para n = 6, foram avaliadas 120 rotas e 720 arestas, conforme o exemplo da seção 4.1.7. Para n = 10, a rota ótima encontrada foi 1-4-3-5-10-2-7-6-9-8-1, com custo 144.
+As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída, n = 12, a rota ótima foi 1-3-6-9-12-4-10-5-2-8-11-7-1, com custo 182. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
 
-![Tempo empírico e curva fatorial](resultados/comparacao.png)
+![Tempos medidos e curva fatorial, em escalas linear e logarítmica.](resultados/comparacao.png)
 
-A comparação utiliza a função f(n) = c × n!, cuja constante foi calculada pela divisão da mediana de n = 10 por 10!. O valor obtido foi c ≈ 9,7999 × 10⁻⁸ segundos por avaliação de aresta. Como esse ponto foi utilizado na calibração, a comparação nos demais tamanhos permite avaliar a aderência à tendência teórica. Nas instâncias pequenas, o custo de preparação da execução e a precisão da medição têm maior influência relativa. Os resultados apresentam uma tendência compatível com o crescimento fatorial. A demonstração assintótica, por sua vez, decorre da contagem de rotas e arestas.
+Fonte: resultados do experimento registrados em `benchmark.csv`.
+
+A curva de comparação é f(n) = c × n!, com c = 9.08231213e-08 s por avaliação de aresta contada. A calibração utiliza a mediana do maior tamanho concluído, dividida por seu fatorial. A coincidência nesse ponto decorre da calibração; a tendência deve ser examinada nos demais pontos. Para tamanhos pequenos, custos fixos e variações de execução têm maior influência relativa. O experimento é compatível com o crescimento fatorial, enquanto a dedução assintótica decorre da estrutura do algoritmo.
 
 ## 4. Análise e discussão
 
-### 4.1. Economia ao fixar a cidade inicial
+### 4.1. Redução do espaço de busca
 
-Sem a fixação da origem, a permutação de todas as cidades produziria n! rotas. Cada ciclo orientado aparece n vezes, uma por possível cidade inicial. A razão entre os espaços é n!/(n−1)! = n. Fixar v₁ reduz a quantidade por um fator n e economiza 1−1/n do total: para n = 10, de 3.628.800 para 362.880 rotas, redução de 90%. Se cada rota continuasse sendo avaliada em n arestas, o trabalho sem fixação seria n × n!, contra n! com fixação. O laço do programa permuta apenas os índices de 1 a n−1, e o contador confirma (n−1)!.
+Sem fixar a origem, seriam geradas n! permutações. Cada circuito orientado apareceria n vezes, uma por possível cidade de partida. Ao fixar v₁, restam (n−1)! rotas. A razão é n!/(n−1)! = n, ou seja, uma redução por um fator n. Para n = 10, a busca passa de 3.628.800 para 362.880 rotas, economia de 90%.
 
-### 4.2. Custo linear por rota
+O teste `test_sem_fixacao` compara as duas estratégias em uma instância de cinco cidades: a enumeração sem fixação produz cinco vezes mais rotas e o mesmo custo ótimo. Na implementação principal, apenas os índices de 1 a n−1 são permutados. Para grafos simétricos, eliminar também os circuitos reversos permitiria uma redução adicional por dois; essa otimização não foi aplicada para manter a contagem solicitada.
 
-O laço de `custo_rota` tem exatamente n iterações; cada uma consulta e soma uma aresta. A operação de módulo inclui a ligação da última cidade à primeira. Logo, o custo de uma avaliação é Θ(n), assumindo aritmética de custo constante para os pequenos inteiros usados. A razão entre a quantidade de arestas e a quantidade de rotas foi igual a n em todos os tamanhos analisados.
+### 4.2. Custo de avaliação e complexidade total
+
+O laço de `custo_rota` executa n iterações, consultando e somando uma aresta em cada uma. A ligação da última cidade à primeira também é incluída. Assim, cada avaliação custa Θ(n), sob o modelo de operações de custo constante para os inteiros utilizados.
+
+Com R = (n−1)! rotas, a quantidade de avaliações de arestas é A(n) = n × (n−1)! = n!. O quociente A(n)/R foi igual a n nos resultados. Portanto, o tempo da implementação é Θ(n!). A contagem n! não corresponde a todas as instruções da CPU: criação de tuplas, comparações e atualização de contadores também contribuem para o tempo.
+
+A matriz ocupa Θ(n²) de memória, enquanto a geração e a avaliação mantêm espaço adicional linear em n. O principal impedimento observado nesta abordagem é o tempo de execução, e não o armazenamento de todas as rotas.
 
 ### 4.3. Limiar prático da intratabilidade
 
-As execuções de n = 3 a 10 não atingiram a escala de minutos ou horas. A maior mediana foi de aproximadamente 0,355619 s. A tabela a seguir apresenta projeções calculadas por c × n! para discutir o limite prático. As instâncias maiores não foram executadas; portanto, esses valores representam estimativas, e não medições:
+A maior instância concluída foi n = 12, com mediana de 43,504420 segundos. A tentativa com n = 13 foi encerrada pelo limite de 90 segundos na repetição 1. Esse limite considera também o início do processo. A execução foi interrompida sem determinar o ótimo. Não há mediana nem contagem completa para essa tentativa.
 
-| n | Tempo projetado (s) | Interpretação aproximada |
-|---|---:|---|
-| 11 | 3,91 | segundos |
-| 12 | 46,94 | menos de um minuto |
-| 13 | 610,24 | cerca de 10 minutos |
-| 14 | 8.543,38 | cerca de 2,4 horas |
-| 15 | 128.150,76 | cerca de 35,6 horas |
+O critério de parada estabelece um limite prático para este experimento, não um tamanho máximo absoluto suportado pelo hardware. Uma execução mais longa poderia concluir outra instância.
 
-O modelo prevê minutos a partir de n = 13 e horas a partir de n = 14 nesta implementação. Isso não é um limite universal. Ao acrescentar uma cidade, o trabalho fatorial cresce por um fator n+1. O Merge Sort exige Θ(n log n), que cresce muito mais lentamente. A recorrência T(n)=2T(n−1)+c da seção 4.2.2 exemplifica crescimento exponencial Θ(2ⁿ); ela não é a recorrência desta implementação do TSP, cujo crescimento é fatorial.
+A tabela seguinte contém somente projeções obtidas com a constante calibrada. Nenhum desses valores deve ser interpretado como um tempo efetivamente medido:
 
-### 4.4. P versus NP e limites da heurística gananciosa
+| n | Rotas previstas | Avaliações de arestas previstas | Tempo projetado (s) |
+|---|---:|---:|---:|
+| 13 | 479.001.600 | 6.227.020.800 | 565,56 |
+| 14 | 6.227.020.800 | 87.178.291.200 | 7.917,80 |
+| 15 | 87.178.291.200 | 1.307.674.368.000 | 118.767,07 |
 
-P e NP são classes de problemas de decisão, e P está contida em NP. NP não significa que todos os seus problemas sejam intratáveis. A versão de decisão do TSP pergunta se existe um circuito de custo no máximo B e é NP-completa; uma rota candidata permite verificar esse limite em tempo polinomial. A versão de otimização implementada aqui é NP-difícil. Verificar o custo de uma rota não é o mesmo que provar sua otimalidade.
+Ao acrescentar uma cidade, a contagem de avaliações cresce por um fator n+1. Esse comportamento explica por que poucos acréscimos podem levar a minutos ou horas. O Merge Sort, com Θ(n log n), apresenta crescimento muito menor. A recorrência T(n) = 2T(n−1) + c, discutida na seção 4.2.2, exemplifica Θ(2ⁿ); não descreve esta implementação do TSP, cujo crescimento é fatorial.
 
-Até hoje não se conhece um algoritmo exato polinomial para o TSP geral nem uma prova de P ≠ NP. A complexidade fatorial desta força bruta não prova que todo algoritmo de TSP precise de tempo fatorial. Programação dinâmica pode melhorar esse limite, ainda com tempo exponencial. Um algoritmo exato polinomial para o TSP geral implicaria P = NP.
+### 4.4. P, NP e limites das heurísticas
 
-A proposta de uma solução gananciosa pode ser examinada pela heurística do vizinho mais próximo. Com uma matriz de custos, sua execução pode ocorrer em O(n²), sem garantia de obtenção da rota ótima. O exemplo a seguir ilustra essa limitação, com partida em A:
+P e NP são classes de problemas de decisão, com P contida em NP. NP reúne problemas cujas respostas positivas admitem certificados verificáveis em tempo polinomial. Isso não significa que todo problema em NP seja intratável. A versão de decisão do TSP pergunta se existe uma rota de custo no máximo B e é NP-completa. A versão de otimização, abordada neste trabalho, é NP-difícil.
 
-| | A | B | C | D |
+Uma rota candidata permite calcular seu custo e verificar se ele respeita B em tempo polinomial. Esse procedimento não prova que a rota seja ótima. Não se conhece um algoritmo exato polinomial para o TSP geral, e P versus NP permanece em aberto. A análise desta força bruta não demonstra que todo algoritmo exato precise de tempo fatorial. A programação dinâmica, por exemplo, reduz o tempo para O(n² × 2ⁿ), ainda exponencial.
+
+A heurística do vizinho mais próximo pode executar em O(n²) com uma matriz, mas escolhas locais não garantem o ótimo global. O exemplo abaixo, partindo de A, demonstra essa limitação:
+
+| Cidade | A | B | C | D |
 |---|---:|---:|---:|---:|
 | A | 0 | 1 | 2 | 3 |
 | B | 1 | 0 | 4 | 5 |
 | C | 2 | 4 | 0 | 100 |
 | D | 3 | 5 | 100 | 0 |
 
-A heurística escolhe A→B→C→D→A, custo 1+4+100+3 = 108. Entretanto, A→C→B→D→A custa 2+4+5+3 = 14, e a força bruta confirma que 14 é ótimo. O teste automatizado desse exemplo confirmou os custos 108 e 14. Heurísticas e metaheurísticas podem buscar boas soluções com menor custo computacional, mas em geral não garantem o ótimo. Garantias de aproximação exigem algoritmos e hipóteses específicas; não decorrem apenas de usar uma estratégia gananciosa.
+O vizinho mais próximo escolhe A→B→C→D→A, com custo 1+4+100+3 = 108. A rota A→C→B→D→A custa 2+4+5+3 = 14. A força bruta confirma que 14 é o ótimo. O exemplo utiliza custos sem a desigualdade triangular, conforme o modelo adotado.
 
-## 5. Conclusão
+Heurísticas e metaheurísticas podem obter boas soluções em menos tempo, mas geralmente não certificam a otimalidade. Garantias de aproximação dependem do algoritmo e de hipóteses específicas sobre os custos.
 
-Os resultados confirmam a correspondência entre a implementação e a análise da Unidade 04: (n−1)! rotas, n avaliações por rota e crescimento total Θ(n!). A fixação da origem reduz o trabalho redundante, mas não elimina o crescimento fatorial. Até dez cidades, os tempos ficaram abaixo de um segundo; pelas projeções, poucos acréscimos no número de cidades já levariam a minutos ou horas. A força bruta permite obter o ótimo e verificar a dedução teórica em instâncias pequenas, mas seu crescimento fatorial limita a aplicação em problemas maiores.
+## 5. Validação e reprodução
 
-## 6. Reprodução e validação
+A suíte contém 24 testes, abrangendo ótimo conhecido, fechamento do circuito, contagem fatorial, economia pela fixação da origem, empates, custos nulos, negativos e fracionários, entradas inválidas e preservação da matriz. Também compara os resultados com uma referência independente por programação dinâmica em 20 matrizes assimétricas, de 3 a 7 cidades.
+
+Os testes do benchmark verificam a gravação dos arquivos, a validação dos argumentos e o encerramento por tempo. Um teste usa uma interrupção simulada para conferir a preservação dos tamanhos anteriores; outro encerra um processo real por limite. Esses testes de infraestrutura são distintos das medições empíricas da seção 3.
+
+Comandos de reprodução, executados na pasta do projeto:
 
 ```bash
-python3 -m unittest -v
-python3 tsp.py --max-n 10 --repeticoes 3
-python3 grafico.py
+python -m pip install -r requirements.txt
+python -m unittest -v
+python tsp.py --max-n 13 --repeticoes 3 --limite 90
+python grafico.py
+python relatorio.py
 ```
 
-A correção foi verificada por quatro testes: uma instância com ótimo conhecido de custo 80, o retorno à origem em uma matriz assimétrica, as contagens fatoriais de n = 3 a 7 e o contraexemplo da heurística. Os quatro testes foram aprovados. O benchmark também confirmou as contagens de n = 3 a 10. A geração do gráfico utiliza a biblioteca Matplotlib.
+No Windows, `python` pode ser substituído por `py`; no Linux, por `python3`. A repetição do experimento altera os tempos. A geração do gráfico e do relatório deve ocorrer após o término do benchmark para manter a correspondência entre os arquivos.
+
+## 6. Conclusão
+
+A implementação confirmou as contagens de (n−1)! rotas e n! avaliações de arestas nos tamanhos concluídos. A fixação da origem remove redundâncias de rotação, mas mantém a complexidade Θ(n!). Os resultados evidenciam a diferença entre a viabilidade em instâncias pequenas e o crescimento do tempo ao aumentar o número de cidades.
+
+O limite adotado e as projeções permitem discutir a intratabilidade prática sem confundir uma execução interrompida com um resultado completo. A busca exaustiva garante o ótimo quando termina; estratégias mais rápidas, como a escolha gananciosa, não oferecem essa garantia em geral.
 
 ## Referência
 
-Material da disciplina Projeto e Análise de Algoritmos, Universidade de Vila Velha. **Unidade 04**, arquivo fornecido `Unidade_04 (6).pdf`, seções 4.1.2–4.1.9 e 4.2. Consultado em 05/11/2026.
+UNIVERSIDADE VILA VELHA. **Unidade 04: Projeto e Análise de Algoritmos**. Material disponibilizado na disciplina, arquivo `Unidade_04 (6).pdf`, seções 4.1 e 4.2. Acesso em: 5 nov. 2026.

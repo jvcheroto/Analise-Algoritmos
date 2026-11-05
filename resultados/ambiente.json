@@ -1,0 +1,15 @@
+{
+  "inicio_utc": "2026-11-05T19:31:23.210823+00:00",
+  "python": "3.12.14",
+  "sistema": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "processador": "",
+  "semente": 42,
+  "repeticoes": 3,
+  "limite_por_execucao_s": 90.0,
+  "max_n_solicitado": 13,
+  "estado": "limite de tempo",
+  "n_interrompido": 13,
+  "repeticao_interrompida": 1,
+  "repeticoes_concluidas_no_n": [],
+  "fim_utc": "2026-11-05T19:35:16.698344+00:00"
+}
