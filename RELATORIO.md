@@ -124,4 +124,4 @@ O limite adotado e as projeções permitem discutir a intratabilidade prática s
 
 ## Referência
 
-UNIVERSIDADE VILA VELHA. **Unidade 04: Projeto e Análise de Algoritmos**. Material disponibilizado na disciplina, arquivo `Unidade_04 (6).pdf`, seções 4.1 e 4.2. Acesso em: 5 nov. 2026.
+UNIVERSIDADE VILA VELHA. **Unidade 04: Projeto e Análise de Algoritmos**. Material disponibilizado na disciplina, arquivo `Unidade_04 (6).pdf`, seções 4.1 e 4.2. 
