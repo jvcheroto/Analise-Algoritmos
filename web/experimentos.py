@@ -157,11 +157,17 @@ class Gerenciador:
                     repeticao=rep, segundos=segundos, custo=int(d['custo_otimo']), rota=rota,
                     exato=True, rotas=int(d['rotas']), arestas=int(d['arestas'])))
         self.registros['inicial'] = dict(id='inicial', estado={'limite de tempo':'limite', 'concluído':'concluido'}.get(meta['estado'], 'interrompido'),
-            titulo='Coleta inicial · ambiente em nuvem', inicio=meta['inicio_utc'], fim=meta.get('fim_utc'),
+            titulo='Coleta inicial', inicio=meta['inicio_utc'], fim=meta.get('fim_utc'),
             config=dict(tipo='benchmark', inicio=3, fim=meta['max_n_solicitado'], repeticoes=meta['repeticoes'],
                         semente=meta['semente'], limite=meta['limite_por_execucao_s'], comparar_origem=False, gerador='biblioteca'),
             ambiente=meta, amostras=amostras, plano_total=(meta['max_n_solicitado'] - 2) * meta['repeticoes'],
             mensagem='Coleta inicial de terminal. Os resultados são anteriores às execuções da interface.', atual=None)
+        arquivo_limiar = RAIZ / 'resultados' / 'complementares' / 'limiar.json'
+        if arquivo_limiar.is_file():
+            registro = json.loads(arquivo_limiar.read_text(encoding='utf-8'))
+            if registro['estado'] == 'concluido':
+                registro['titulo'] = 'Limiar de minutos · coleta complementar'
+                self.registros.setdefault(registro['id'], registro)
 
     def _salvar(self, registro):
         caminho = self.pasta / (registro['id'] + '.json')

@@ -70,7 +70,7 @@ def gerar(pasta='resultados', destino='RELATORIO.md'):
             complemento += (f"\n\n**{titulo}:** coleta de {faixa}, "
                             f"{c['repeticoes']} repetições, semente {c['semente']}, "
                             f"{len(registro['amostras'])} chamadas completas. "
-                            f"Ambiente: Python {ambiente['python']}, `{ambiente['sistema']}`. "
+                            f"Python {ambiente['python']}; ambiente registrado no arquivo da coleta. "
                             f"Registros em [{nome}.json]({fonte}).")
             linhas = resumo(registro['amostras'])
             if nome == 'origem':
@@ -91,6 +91,45 @@ def gerar(pasta='resultados', destino='RELATORIO.md'):
     if complemento:
         complemento = ('\n\nAs coletas complementares dos gráficos 5 e 6 são independentes da tabela inicial '
                        'e não entram na calibração de c.' + complemento)
+    limiar_complementar = ''
+    nota_projecoes = 'As projeções abaixo usam a mesma constante c. Esses tempos não foram medidos:'
+    alcance = f'A coleta inicial foi concluída até n = {maior}; os tamanhos seguintes foram discutidos por projeção.'
+    arquivo_limiar = pasta / 'complementares' / 'limiar.json'
+    if arquivo_limiar.is_file():
+        registro = json.loads(arquivo_limiar.read_text(encoding='utf-8'))
+        if registro['estado'] != 'concluido' or len(registro['amostras']) != 2:
+            raise ValueError('A coleta do limiar deve conter duas chamadas completas')
+        resultados = {d['n']: d for d in resumo(registro['amostras'])}
+        if set(resultados) != {12, 13}:
+            raise ValueError('A coleta do limiar deve comparar 12 e 13 cidades')
+        for n, d in resultados.items():
+            if (d['algoritmo'] != 'bruta' or not d['fixar'] or d['repeticoes'] != 1
+                    or d['rotas'] != math.factorial(n - 1) or d['arestas'] != math.factorial(n)):
+                raise ValueError('Contagens ou protocolo da coleta do limiar inválidos')
+        t12, t13 = resultados[12]['mediana'], resultados[13]['mediana']
+        fonte = Path(os.path.relpath(arquivo_limiar, Path(destino).parent)).as_posix()
+        ambiente = registro['ambiente']
+        tabela_limiar = '\n'.join(
+            f"| {n} | {decimal(resultados[n]['mediana'])} | {inteiro(resultados[n]['rotas'])} | {inteiro(resultados[n]['arestas'])} |"
+            for n in (12, 13))
+        limiar_complementar = (f'\n\n**Execução completa para observar o limiar.** Uma nova coleta, separada da inicial, '
+            f'executou 12 e 13 cidades com uma repetição por tamanho, origem fixa, semente '
+            f"{registro['config']['semente']} e gerador da biblioteca Python {ambiente['python']}. "
+            f"O ambiente e as amostras estão registrados em [limiar.json]({fonte}).\n\n"
+            '| n | Tempo medido (s) | Rotas avaliadas | Avaliações de arestas |\n'
+            '|---|---:|---:|---:|\n' + tabela_limiar +
+            f'\n\nA execução de 13 cidades terminou em {decimal(t13 / 60, 2)} minutos e encontrou custo '
+            f"ótimo {resultados[13]['custo']}. A razão dos tempos entre 13 e 12 cidades foi "
+            f'{decimal(t13 / t12, 2)}, enquanto as avaliações de arestas aumentaram exatamente 13 vezes. '
+            'A contagem cresce por um fator exato; os tempos também dependem da carga e dos custos da implementação. '
+            'Esta coleta tem uma única execução por tamanho e não caracteriza a dispersão dos tempos. '
+            'Seus resultados não foram incorporados às medianas nem à constante c da coleta inicial.')
+        if t12 < 60 <= t13:
+            limiar_complementar += ' Nesta coleta, 12 cidades ficaram abaixo de um minuto e 13 já exigiram minutos.'
+        nota_projecoes = ('As projeções abaixo preservam a constante c da coleta inicial. '
+                          'O novo tempo de 13 cidades não foi incorporado à calibração:')
+        alcance = (f'A coleta complementar concluiu 13 cidades em {decimal(t13 / 60, 2)} minutos, '
+                   'registrando diretamente o aumento para a escala de minutos.')
     texto = f'''# Explorando a intratabilidade e a força bruta no Problema do Caixeiro Viajante
 
 **Autor:** João Victor Piumbini Cheroto
@@ -111,7 +150,7 @@ A cidade de índice 0, correspondente a v₁, permanece fixa. A função `resolv
 
 Foram solicitadas instâncias de 3 a {meta['max_n_solicitado']} cidades, com número de repetições igual a {meta['repeticoes']} por tamanho e limite de {decimal(meta['limite_por_execucao_s'], 0)} segundos por execução. Os tamanhos de 3 a {maior} foram concluídos integralmente. A medição usa `time.perf_counter()` dentro do processo de cálculo, incluindo validação da matriz, geração de permutações, avaliação, contagem e escolha do ótimo. A criação da matriz, o início do processo, a comunicação entre processos, a gravação dos arquivos e a geração dos gráficos ficam fora do tempo registrado no CSV.
 
-Ambiente registrado na coleta: Python {meta['python']}, sistema `{meta['sistema']}`. As chamadas são sequenciais, cada uma em um processo separado para permitir o encerramento por tempo. Hardware e carga do sistema influenciam as medições.
+As medições utilizaram Python {meta['python']}. O ambiente de execução está registrado em `ambiente.json`. As chamadas são sequenciais, cada uma em um processo separado para permitir o encerramento por tempo. Hardware e carga do sistema influenciam as medições.
 
 O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tamanho concluído. As contagens são verificadas após cada chamada. Interrupções ficam registradas em `ambiente.json`.
 
@@ -121,7 +160,7 @@ O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tam
 |---|---:|---:|---:|---:|
 {tabela}
 
-As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída, n = {maior}, a rota ótima foi {ultimo['rota']}, com custo {ultimo['custo_otimo']}. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
+As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída da coleta inicial, n = {maior}, a rota ótima foi {ultimo['rota']}, com custo {ultimo['custo_otimo']}. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
 
 {figuras}{complemento}
 
@@ -147,11 +186,11 @@ A matriz ocupa Θ(n²) de memória. A geração e a avaliação usam espaço adi
 
 ### 4.3. Limiar prático da intratabilidade
 
-A maior instância concluída foi n = {maior}, com mediana de {decimal(tempo)} segundos. {limite}
+A maior instância concluída na coleta inicial foi n = {maior}, com mediana de {decimal(tempo)} segundos. {limite}
 
-O limite de tempo é o critério de parada adotado. Ele não determina o maior tamanho que a máquina conseguiria resolver com mais tempo.
+O limite de tempo foi o critério de parada da coleta inicial. Ele não determina o maior tamanho que a máquina conseguiria resolver com mais tempo.{limiar_complementar}
 
-As projeções abaixo usam a mesma constante c. Esses tempos não foram medidos:
+{nota_projecoes}
 
 | n | Rotas previstas | Avaliações de arestas previstas | Tempo projetado (s) |
 |---|---:|---:|---:|
@@ -161,9 +200,9 @@ Ao acrescentar uma cidade, a contagem de avaliações cresce por um fator n+1. E
 
 ### 4.4. P, NP e limites das heurísticas
 
-P e NP são classes de problemas de decisão, com P contida em NP. NP reúne problemas cujas respostas positivas admitem certificados verificáveis em tempo polinomial. Isso não significa que todo problema em NP seja intratável. A versão de decisão do TSP pergunta se existe uma rota de custo no máximo B e é NP-completa. A versão de otimização, abordada neste trabalho, é NP-difícil.
+P reúne os problemas de decisão resolvíveis por um algoritmo determinístico em tempo polinomial. NP reúne os problemas cujas respostas positivas admitem certificados verificáveis em tempo polinomial. P está contida em NP. Isso não significa que todo problema em NP seja intratável. A versão de decisão do TSP pergunta se existe uma rota de custo no máximo B e é NP-completa. A versão de otimização, abordada neste trabalho, é NP-difícil.
 
-Uma rota candidata permite calcular seu custo e verificar se ele respeita B em tempo polinomial. Esse procedimento não prova que a rota seja ótima. Não se conhece um algoritmo exato polinomial para o TSP geral, e P versus NP permanece em aberto. A análise desta força bruta não demonstra que todo algoritmo exato precise de tempo fatorial. A programação dinâmica, por exemplo, reduz o tempo para O(n² × 2ⁿ), ainda exponencial.
+Uma rota candidata permite calcular seu custo e verificar se ele respeita B em tempo polinomial. Esse procedimento não prova que a rota seja ótima. Não se conhece um algoritmo exato polinomial para o TSP geral, e P versus NP permanece em aberto. A análise desta força bruta não demonstra que todo algoritmo exato precise de tempo fatorial. A programação dinâmica, por exemplo, reduz o tempo para O(n² × 2ⁿ), ainda exponencial. Um algoritmo exato polinomial para o TSP geral resolveria sua versão de decisão e implicaria P = NP.
 
 A heurística do vizinho mais próximo pode executar em O(n²) com uma matriz, mas escolhas locais não garantem o ótimo global. O exemplo abaixo, partindo de A, demonstra essa limitação:
 
@@ -176,7 +215,7 @@ A heurística do vizinho mais próximo pode executar em O(n²) com uma matriz, m
 
 O vizinho mais próximo escolhe A→B→C→D→A, com custo 1+4+100+3 = 108. A rota A→C→B→D→A custa 2+4+5+3 = 14. A força bruta confirma que 14 é o ótimo. O exemplo utiliza custos sem a desigualdade triangular, conforme o modelo adotado.
 
-Heurísticas e metaheurísticas podem obter boas soluções em menos tempo, mas geralmente não certificam a otimalidade. Garantias de aproximação dependem do algoritmo e de hipóteses específicas sobre os custos.
+Uma heurística aplica uma regra específica de busca, como escolher o vizinho mais próximo. Metaheurísticas orientam a exploração de soluções: a busca tabu usa memória para restringir movimentos; o recozimento simulado pode aceitar pioras para escapar de ótimos locais; algoritmos genéticos trabalham com populações de soluções. Essas estratégias não garantem, em geral, encontrar o ótimo global. Garantias de aproximação dependem do algoritmo e de hipóteses específicas sobre os custos.
 
 ## 5. Validação e reprodução
 
@@ -205,7 +244,7 @@ As coletas da interface ficam em `experimentos/` e não foram agregadas aos resu
 
 ## 6. Conclusão
 
-As contagens observadas confirmaram (n−1)! rotas e n! avaliações de arestas. Fixar a origem reduz o trabalho redundante, mas mantém a complexidade Θ(n!). A busca foi concluída até n = {maior}; as instâncias seguintes foram discutidas por projeção. O crescimento fatorial limita a aplicação da força bruta, apesar da garantia de ótimo nas execuções completas. Heurísticas reduzem o custo da busca, mas não oferecem a mesma garantia em geral.
+As contagens observadas confirmaram (n−1)! rotas e n! avaliações de arestas. Fixar a origem reduz o trabalho redundante, mas mantém a complexidade Θ(n!). {alcance} O crescimento fatorial limita a aplicação da força bruta, apesar da garantia de ótimo nas execuções completas. Heurísticas reduzem o custo da busca, mas não oferecem a mesma garantia em geral.
 
 ## Referência
 

@@ -1,0 +1,160 @@
+{
+  "id": "d9ef3ab11c934cce9cb6648de00fb1c4",
+  "titulo": "Crescimento fatorial",
+  "estado": "concluido",
+  "inicio": "2026-11-05T20:29:41.083817+00:00",
+  "fim": "2026-11-05T20:40:09.435607+00:00",
+  "config": {
+    "tipo": "benchmark",
+    "inicio": 12,
+    "fim": 13,
+    "repeticoes": 1,
+    "semente": 42,
+    "limite": 3600,
+    "comparar_origem": false,
+    "gerador": "biblioteca"
+  },
+  "ambiente": {
+    "python": "3.12.14",
+    "sistema": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cronometro": "perf_counter somente no cálculo, incluindo validações e contadores; sem aquecimento"
+  },
+  "amostras": [
+    {
+      "n": 12,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticao": 1,
+      "custo": 182,
+      "rota": [
+        0,
+        2,
+        5,
+        8,
+        11,
+        3,
+        9,
+        4,
+        1,
+        7,
+        10,
+        6,
+        0
+      ],
+      "rotas": 39916800,
+      "arestas": 479001600,
+      "exato": true,
+      "segundos": 46.28051014199991
+    },
+    {
+      "n": 13,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticao": 1,
+      "custo": 156,
+      "rota": [
+        0,
+        2,
+        3,
+        6,
+        1,
+        7,
+        12,
+        4,
+        9,
+        5,
+        10,
+        11,
+        8,
+        0
+      ],
+      "rotas": 479001600,
+      "arestas": 6227020800,
+      "exato": true,
+      "segundos": 581.9439443609999
+    }
+  ],
+  "plano_total": 2,
+  "atual": {
+    "n": 13,
+    "algoritmo": "bruta",
+    "fixar": true,
+    "repeticao": 1
+  },
+  "mensagem": "Todas as chamadas planejadas foram concluídas.",
+  "resumo": [
+    {
+      "n": 12,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticoes": 1,
+      "mediana": 46.28051014199991,
+      "minimo": 46.28051014199991,
+      "maximo": 46.28051014199991,
+      "custo": 182,
+      "rota": [
+        0,
+        2,
+        5,
+        8,
+        11,
+        3,
+        9,
+        4,
+        1,
+        7,
+        10,
+        6,
+        0
+      ],
+      "exato": true,
+      "rotas": 39916800,
+      "arestas": 479001600
+    },
+    {
+      "n": 13,
+      "algoritmo": "bruta",
+      "fixar": true,
+      "repeticoes": 1,
+      "mediana": 581.9439443609999,
+      "minimo": 581.9439443609999,
+      "maximo": 581.9439443609999,
+      "custo": 156,
+      "rota": [
+        0,
+        2,
+        3,
+        6,
+        1,
+        7,
+        12,
+        4,
+        9,
+        5,
+        10,
+        11,
+        8,
+        0
+      ],
+      "exato": true,
+      "rotas": 479001600,
+      "arestas": 6227020800
+    }
+  ],
+  "constante": 9.345463313066176e-08,
+  "calibracao_n": 13,
+  "projecoes": [
+    {
+      "n": 14,
+      "segundos": 8147.215221053998
+    },
+    {
+      "n": 15,
+      "segundos": 122208.22831580997
+    },
+    {
+      "n": 16,
+      "segundos": 1955331.6530529596
+    }
+  ]
+}

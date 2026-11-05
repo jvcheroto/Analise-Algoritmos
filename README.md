@@ -46,7 +46,7 @@ O benchmark aceita até 16 cidades; os outros modos, até 12. São permitidas de
 
 ## Histórico e downloads
 
-A coleta inicial contém 30 chamadas completas, de três a 12 cidades, e uma tentativa interrompida em 13. Ela foi realizada em ambiente em nuvem e permanece separada das novas coletas.
+A coleta inicial contém 30 chamadas completas, de três a 12 cidades, e uma tentativa interrompida em 13. Ela permanece separada das novas coletas. Os parâmetros e o ambiente de execução estão registrados nos arquivos de resultados.
 
 Os experimentos da interface ficam em `experimentos/`, no computador que executa o servidor. Cada chamada concluída é salva antes da seguinte. Cancelamentos preservam esses resultados. Após um fechamento inesperado, o histórico marca a execução como interrompida, sem retomar o cálculo.
 
@@ -81,6 +81,17 @@ Para refazer as coletas complementares e atualizar os gráficos e o relatório:
 
 Essa sequência substitui os resultados complementares incluídos pelos tempos obtidos no computador da execução. Os seis gráficos só ficam completos após as duas coletas terminarem. Para novos benchmarks em outra pasta, `grafico.py --pasta CAMINHO` gera os quatro primeiros e inclui os complementares apenas quando seus registros estão presentes nessa pasta.
 
+## Observação do limiar de minutos
+
+A coleta inicial para em 90 segundos. Para medir o tempo completo de 12 e 13 cidades em uma coleta separada:
+
+```powershell
+.\.venv\Scripts\python.exe coleta_limiar.py
+.\.venv\Scripts\python.exe relatorio.py
+```
+
+O limite dessa coleta é de uma hora por chamada, com uma repetição por tamanho, origem fixa, semente 42 e gerador da biblioteca. A execução pode levar vários minutos. Os arquivos `resultados/complementares/limiar.json` e `limiar.csv` são gravados somente se as duas chamadas terminarem. Chamadas concluídas durante uma interrupção permanecem em `resultados/complementares/execucoes/`. O relatório mantém essa coleta separada das medianas e da curva original. Após sua conclusão, ela também aparece no histórico da aplicação como **Limiar de minutos · coleta complementar**.
+
 ## Testes
 
 ```powershell
@@ -109,5 +120,6 @@ Os comandos criam uma coleta separada e geram seu gráfico e relatório. `relato
 - `resultados/`: dados e gráficos da coleta inicial.
 - `grafico.py` e `relatorio.py`: geração dos gráficos e do relatório.
 - `coleta_complementar.py`: comparação da origem e dos métodos.
+- `coleta_limiar.py`: medição completa de 12 e 13 cidades.
 - `catalogo_graficos.py`: títulos e arquivos da galeria.
 - `RELATORIO.md`: relatório da atividade.

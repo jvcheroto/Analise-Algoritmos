@@ -18,7 +18,7 @@ A cidade de índice 0, correspondente a v₁, permanece fixa. A função `resolv
 
 Foram solicitadas instâncias de 3 a 13 cidades, com número de repetições igual a 3 por tamanho e limite de 90 segundos por execução. Os tamanhos de 3 a 12 foram concluídos integralmente. A medição usa `time.perf_counter()` dentro do processo de cálculo, incluindo validação da matriz, geração de permutações, avaliação, contagem e escolha do ótimo. A criação da matriz, o início do processo, a comunicação entre processos, a gravação dos arquivos e a geração dos gráficos ficam fora do tempo registrado no CSV.
 
-Ambiente registrado na coleta: Python 3.12.14, sistema `Linux-6.18.57-x86_64-with-glibc2.41`. As chamadas são sequenciais, cada uma em um processo separado para permitir o encerramento por tempo. Hardware e carga do sistema influenciam as medições.
+As medições utilizaram Python 3.12.14. O ambiente de execução está registrado em `ambiente.json`. As chamadas são sequenciais, cada uma em um processo separado para permitir o encerramento por tempo. Hardware e carga do sistema influenciam as medições.
 
 O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tamanho concluído. As contagens são verificadas após cada chamada. Interrupções ficam registradas em `ambiente.json`.
 
@@ -37,7 +37,7 @@ O CSV reúne os tempos individuais, a mediana, o mínimo e o máximo de cada tam
 | 11 | 3.628.800 | 39.916.800 | 3,686878526 | 135 |
 | 12 | 39.916.800 | 479.001.600 | 43,504420408 | 182 |
 
-As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída, n = 12, a rota ótima foi 1-3-6-9-12-4-10-5-2-8-11-7-1, com custo 182. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
+As contagens coincidiram com as expressões teóricas em todas as repetições concluídas. O exemplo de n = 6 corresponde a 120 rotas e 720 arestas, conforme a seção 4.1.7 do material. Na maior instância concluída da coleta inicial, n = 12, a rota ótima foi 1-3-6-9-12-4-10-5-2-8-11-7-1, com custo 182. Os custos ótimos entre tamanhos não precisam crescer, pois as matrizes são distintas.
 
 ### Gráfico 1 — Tempo de execução — escala linear
 
@@ -77,9 +77,9 @@ Coleta complementar: força bruta, Held–Karp e vizinho mais próximo na mesma 
 
 As coletas complementares dos gráficos 5 e 6 são independentes da tabela inicial e não entram na calibração de c.
 
-**Fixação da origem:** coleta de 3 a 9 cidades, 3 repetições, semente 42, 42 chamadas completas. Ambiente: Python 3.12.14, `Linux-6.18.57-x86_64-with-glibc2.41`. Registros em [origem.json](resultados/complementares/origem.json). Em n = 9, as medianas foram 0,036296 s com origem fixa e 0,317955 s com origem livre. A razão dos tempos foi 8,76, enquanto a razão das contagens de rotas foi exatamente 9.
+**Fixação da origem:** coleta de 3 a 9 cidades, 3 repetições, semente 42, 42 chamadas completas. Python 3.12.14; ambiente registrado no arquivo da coleta. Registros em [origem.json](resultados/complementares/origem.json). Em n = 9, as medianas foram 0,036296 s com origem fixa e 0,317955 s com origem livre. A razão dos tempos foi 8,76, enquanto a razão das contagens de rotas foi exatamente 9.
 
-**Métodos de solução:** coleta de 10 cidades, 3 repetições, semente 42, 9 chamadas completas. Ambiente: Python 3.12.14, `Linux-6.18.57-x86_64-with-glibc2.41`. Registros em [metodos.json](resultados/complementares/metodos.json). Força bruta e Held–Karp encontraram custo 144; o vizinho mais próximo encontrou 224. O menor tempo do guloso não implica garantia de ótimo.
+**Métodos de solução:** coleta de 10 cidades, 3 repetições, semente 42, 9 chamadas completas. Python 3.12.14; ambiente registrado no arquivo da coleta. Registros em [metodos.json](resultados/complementares/metodos.json). Força bruta e Held–Karp encontraram custo 144; o vizinho mais próximo encontrou 224. O menor tempo do guloso não implica garantia de ótimo.
 
 Fonte: resultados do experimento registrados em `benchmark.csv`.
 
@@ -103,11 +103,20 @@ A matriz ocupa Θ(n²) de memória. A geração e a avaliação usam espaço adi
 
 ### 4.3. Limiar prático da intratabilidade
 
-A maior instância concluída foi n = 12, com mediana de 43,504420 segundos. A tentativa com n = 13 foi encerrada pelo limite de 90 segundos na repetição 1. Esse limite considera também o início do processo. A execução foi interrompida sem determinar o ótimo. Não há mediana nem contagem completa para essa tentativa.
+A maior instância concluída na coleta inicial foi n = 12, com mediana de 43,504420 segundos. A tentativa com n = 13 foi encerrada pelo limite de 90 segundos na repetição 1. Esse limite considera também o início do processo. A execução foi interrompida sem determinar o ótimo. Não há mediana nem contagem completa para essa tentativa.
 
-O limite de tempo é o critério de parada adotado. Ele não determina o maior tamanho que a máquina conseguiria resolver com mais tempo.
+O limite de tempo foi o critério de parada da coleta inicial. Ele não determina o maior tamanho que a máquina conseguiria resolver com mais tempo.
 
-As projeções abaixo usam a mesma constante c. Esses tempos não foram medidos:
+**Execução completa para observar o limiar.** Uma nova coleta, separada da inicial, executou 12 e 13 cidades com uma repetição por tamanho, origem fixa, semente 42 e gerador da biblioteca Python 3.12.14. O ambiente e as amostras estão registrados em [limiar.json](resultados/complementares/limiar.json).
+
+| n | Tempo medido (s) | Rotas avaliadas | Avaliações de arestas |
+|---|---:|---:|---:|
+| 12 | 46,280510 | 39.916.800 | 479.001.600 |
+| 13 | 581,943944 | 479.001.600 | 6.227.020.800 |
+
+A execução de 13 cidades terminou em 9,70 minutos e encontrou custo ótimo 156. A razão dos tempos entre 13 e 12 cidades foi 12,57, enquanto as avaliações de arestas aumentaram exatamente 13 vezes. A contagem cresce por um fator exato; os tempos também dependem da carga e dos custos da implementação. Esta coleta tem uma única execução por tamanho e não caracteriza a dispersão dos tempos. Seus resultados não foram incorporados às medianas nem à constante c da coleta inicial. Nesta coleta, 12 cidades ficaram abaixo de um minuto e 13 já exigiram minutos.
+
+As projeções abaixo preservam a constante c da coleta inicial. O novo tempo de 13 cidades não foi incorporado à calibração:
 
 | n | Rotas previstas | Avaliações de arestas previstas | Tempo projetado (s) |
 |---|---:|---:|---:|
@@ -119,9 +128,9 @@ Ao acrescentar uma cidade, a contagem de avaliações cresce por um fator n+1. E
 
 ### 4.4. P, NP e limites das heurísticas
 
-P e NP são classes de problemas de decisão, com P contida em NP. NP reúne problemas cujas respostas positivas admitem certificados verificáveis em tempo polinomial. Isso não significa que todo problema em NP seja intratável. A versão de decisão do TSP pergunta se existe uma rota de custo no máximo B e é NP-completa. A versão de otimização, abordada neste trabalho, é NP-difícil.
+P reúne os problemas de decisão resolvíveis por um algoritmo determinístico em tempo polinomial. NP reúne os problemas cujas respostas positivas admitem certificados verificáveis em tempo polinomial. P está contida em NP. Isso não significa que todo problema em NP seja intratável. A versão de decisão do TSP pergunta se existe uma rota de custo no máximo B e é NP-completa. A versão de otimização, abordada neste trabalho, é NP-difícil.
 
-Uma rota candidata permite calcular seu custo e verificar se ele respeita B em tempo polinomial. Esse procedimento não prova que a rota seja ótima. Não se conhece um algoritmo exato polinomial para o TSP geral, e P versus NP permanece em aberto. A análise desta força bruta não demonstra que todo algoritmo exato precise de tempo fatorial. A programação dinâmica, por exemplo, reduz o tempo para O(n² × 2ⁿ), ainda exponencial.
+Uma rota candidata permite calcular seu custo e verificar se ele respeita B em tempo polinomial. Esse procedimento não prova que a rota seja ótima. Não se conhece um algoritmo exato polinomial para o TSP geral, e P versus NP permanece em aberto. A análise desta força bruta não demonstra que todo algoritmo exato precise de tempo fatorial. A programação dinâmica, por exemplo, reduz o tempo para O(n² × 2ⁿ), ainda exponencial. Um algoritmo exato polinomial para o TSP geral resolveria sua versão de decisão e implicaria P = NP.
 
 A heurística do vizinho mais próximo pode executar em O(n²) com uma matriz, mas escolhas locais não garantem o ótimo global. O exemplo abaixo, partindo de A, demonstra essa limitação:
 
@@ -134,7 +143,7 @@ A heurística do vizinho mais próximo pode executar em O(n²) com uma matriz, m
 
 O vizinho mais próximo escolhe A→B→C→D→A, com custo 1+4+100+3 = 108. A rota A→C→B→D→A custa 2+4+5+3 = 14. A força bruta confirma que 14 é o ótimo. O exemplo utiliza custos sem a desigualdade triangular, conforme o modelo adotado.
 
-Heurísticas e metaheurísticas podem obter boas soluções em menos tempo, mas geralmente não certificam a otimalidade. Garantias de aproximação dependem do algoritmo e de hipóteses específicas sobre os custos.
+Uma heurística aplica uma regra específica de busca, como escolher o vizinho mais próximo. Metaheurísticas orientam a exploração de soluções: a busca tabu usa memória para restringir movimentos; o recozimento simulado pode aceitar pioras para escapar de ótimos locais; algoritmos genéticos trabalham com populações de soluções. Essas estratégias não garantem, em geral, encontrar o ótimo global. Garantias de aproximação dependem do algoritmo e de hipóteses específicas sobre os custos.
 
 ## 5. Validação e reprodução
 
@@ -163,7 +172,7 @@ As coletas da interface ficam em `experimentos/` e não foram agregadas aos resu
 
 ## 6. Conclusão
 
-As contagens observadas confirmaram (n−1)! rotas e n! avaliações de arestas. Fixar a origem reduz o trabalho redundante, mas mantém a complexidade Θ(n!). A busca foi concluída até n = 12; as instâncias seguintes foram discutidas por projeção. O crescimento fatorial limita a aplicação da força bruta, apesar da garantia de ótimo nas execuções completas. Heurísticas reduzem o custo da busca, mas não oferecem a mesma garantia em geral.
+As contagens observadas confirmaram (n−1)! rotas e n! avaliações de arestas. Fixar a origem reduz o trabalho redundante, mas mantém a complexidade Θ(n!). A coleta complementar concluiu 13 cidades em 9,70 minutos, registrando diretamente o aumento para a escala de minutos. O crescimento fatorial limita a aplicação da força bruta, apesar da garantia de ótimo nas execuções completas. Heurísticas reduzem o custo da busca, mas não oferecem a mesma garantia em geral.
 
 ## Referência
 
